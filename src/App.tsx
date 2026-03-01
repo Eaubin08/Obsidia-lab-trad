@@ -35,8 +35,12 @@ export default function App() {
     localStorage.setItem('obsidia_mode', mode);
   }, [mode]);
 
-  const addLog = (msg: string) => {
-    setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+  const addLog = (msg: string, isCommand: boolean = false) => {
+    if (isCommand) {
+      setLogs(prev => [...prev, msg]);
+    } else {
+      setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+    }
   };
 
   const runTest = () => {
@@ -46,9 +50,9 @@ export default function App() {
     setLogs([]);
     setConfidenceScore(0);
     setIsTerminalOpen(true);
-    addLog(`RUN  v1.0.4 /home/user/obsidia-gov`);
-    addLog(`❯ tests/akaton/${testType === 'AUTONOMOUS' ? 'AutonomousAudit' : 'FixedValidation'}.test.ts`);
-    addLog(` `);
+    addLog(`RUN  v1.0.4 /home/user/obsidia-gov`, true);
+    addLog(`❯ tests/akaton/${testType === 'AUTONOMOUS' ? 'AutonomousAudit' : 'FixedValidation'}.test.ts`, true);
+    addLog(` `, true);
     if (testType === 'AUTONOMOUS') {
       addLog('  [AI] Initializing Akaton Autonomous Audit Agent...');
       addLog('  [AI] Scanning for ERC-8004 Invariant Breaches...');
@@ -298,6 +302,7 @@ export default function App() {
           isMaximized={isTerminalMaximized}
           onToggleMaximize={() => setIsTerminalMaximized(!isTerminalMaximized)}
           onRunTest={runTest}
+          onAddLog={(msg) => addLog(msg, msg.startsWith('$'))}
           logs={logs}
           testStatus={testStatus}
         />

@@ -8,11 +8,12 @@ interface TerminalProps {
   onToggleMaximize: () => void;
   onClose: () => void;
   onRunTest: () => void;
+  onAddLog: (msg: string) => void;
   logs: string[];
   testStatus: 'IDLE' | 'RUNNING' | 'COMPLETED';
 }
 
-export function Terminal({ isOpen, isMaximized, onToggleMaximize, onClose, onRunTest, logs, testStatus }: TerminalProps) {
+export function Terminal({ isOpen, isMaximized, onToggleMaximize, onClose, onRunTest, onAddLog, logs, testStatus }: TerminalProps) {
   const [command, setCommand] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -27,19 +28,18 @@ export function Terminal({ isOpen, isMaximized, onToggleMaximize, onClose, onRun
     const cmd = command.trim();
     if (!cmd) return;
 
-    // Add command to logs
-    logs.push(`$ ${cmd}`);
+    // Add command to logs via parent callback
+    onAddLog(`$ ${cmd}`);
     
     const lowerCmd = cmd.toLowerCase();
     if (lowerCmd === 'npm test' || lowerCmd === 'vitest') {
       onRunTest();
     } else if (lowerCmd === 'clear') {
-      // In a real app we'd clear logs, but here we'll just add a note
-      logs.push('Terminal cleared.');
+      onAddLog('Terminal cleared.');
     } else if (lowerCmd === 'help') {
-      logs.push('Available commands: npm test, clear, help');
+      onAddLog('Available commands: npm test, clear, help');
     } else {
-      logs.push(`Command not found: ${cmd}`);
+      onAddLog(`Command not found: ${cmd}`);
     }
     
     setCommand('');
@@ -138,6 +138,7 @@ export function Terminal({ isOpen, isMaximized, onToggleMaximize, onClose, onRun
           className="bg-transparent border-none outline-none text-zinc-300 w-full placeholder:text-zinc-800 text-xs font-mono"
           autoFocus
         />
+        <button type="submit" className="hidden" aria-hidden="true" />
       </form>
     </div>
   );
