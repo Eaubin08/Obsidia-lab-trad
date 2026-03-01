@@ -6,6 +6,20 @@ export function AgentRegistry({ onNext }: { onNext: () => void }) {
   const [isRegistered, setIsRegistered] = useState(false);
   const [handle, setHandle] = useState('');
 
+  const registrationData = {
+    type: "ERC-8004_AGENT",
+    name: handle || "pending",
+    services: ["DEX_EXECUTION", "RISK_ROUTING"],
+    x402Support: true,
+    supportedTrust: ["TEE", "ZK_PROOF"],
+    capabilities: ["DEX_TRADING", "RISK_ANALYSIS"],
+    endpoints: {
+      rpc: "https://api.akaton.io/v1/agent",
+      status: `https://status.akaton.io/${handle || '...'}`
+    },
+    agentWallet: "0x742d...44e"
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-2">
@@ -78,19 +92,7 @@ export function AgentRegistry({ onNext }: { onNext: () => void }) {
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-4">
             <h3 className="text-lg font-semibold text-white">Registration JSON</h3>
             <div className="bg-black rounded-xl p-4 font-mono text-[10px] sm:text-xs text-zinc-500 overflow-x-auto">
-              <pre>{JSON.stringify({
-                type: "ERC-8004_AGENT",
-                name: handle || "pending",
-                services: ["DEX_EXECUTION", "RISK_ROUTING"],
-                x402Support: true,
-                supportedTrust: ["TEE", "ZK_PROOF"],
-                capabilities: ["DEX_TRADING", "RISK_ANALYSIS"],
-                endpoints: {
-                  rpc: "https://api.akaton.io/v1/agent",
-                  status: `https://status.akaton.io/${handle || '...'}`
-                },
-                agentWallet: "0x742d...44e"
-              }, null, 2)}</pre>
+              <pre>{JSON.stringify(registrationData, null, 2)}</pre>
             </div>
           </div>
         </div>

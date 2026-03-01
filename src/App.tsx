@@ -36,7 +36,7 @@ export default function App() {
   }, [mode]);
 
   const addLog = (msg: string, isCommand: boolean = false) => {
-    if (isCommand) {
+    if (isCommand || msg.startsWith(' ') || msg.includes('PASS') || msg.includes('✓') || msg.includes('VERDICT')) {
       setLogs(prev => [...prev, msg]);
     } else {
       setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
@@ -50,7 +50,7 @@ export default function App() {
     setConfidenceScore(0);
     setIsTerminalOpen(true);
     
-    // Don't clear logs, just add the test header
+    // Add the test header
     addLog(` `, true);
     addLog(`> obsidia-governance-os@1.0.4 test`, true);
     addLog(`Running ERC-8004 governance validation suite...`, true);
@@ -124,7 +124,7 @@ export default function App() {
       ];
 
       let stepIdx = 0;
-      const timer = setInterval(() => {
+      const interval = setInterval(() => {
         if (stepIdx < steps.length) {
           const step = steps[stepIdx];
           if (step.gate < 3) setCurrentGate(step.gate);
@@ -132,19 +132,13 @@ export default function App() {
           
           step.logs.forEach((log, i) => {
             setTimeout(() => {
-              if (log.includes('PASS') || log.includes('✓')) {
-                addLog(`\x1b[32m${log}\x1b[0m`);
-              } else if (log.includes('[AI]')) {
-                addLog(`\x1b[34m${log}\x1b[0m`);
-              } else {
-                addLog(log);
-              }
-            }, i * 150);
+              addLog(log);
+            }, i * 100);
           });
 
           stepIdx++;
         } else {
-          clearInterval(timer);
+          clearInterval(interval);
           setTestStatus('COMPLETED');
           setConfidenceScore(100);
           
@@ -159,19 +153,22 @@ export default function App() {
           if (mode === 'FIX') {
             const s = scenarios.find(sc => sc.id === selectedScenario);
             setOutcome(s || scenarios[2]);
-            addLog(`\nVERDICT: ${s?.outcome || 'EXECUTE'}`);
+            addLog(` `);
+            addLog(`VERDICT: ${s?.outcome || 'EXECUTE'}`);
           } else {
             const random = Math.random();
             let res = random > 0.7 ? scenarios[0] : random > 0.5 ? scenarios[1] : scenarios[2];
             setOutcome(res);
-            addLog(`\nVERDICT: ${res.outcome}`);
+            addLog(` `);
+            addLog(`VERDICT: ${res.outcome}`);
           }
         }
-      }, 1200);
+      }, 1500);
 
-      return () => clearInterval(timer);
+      return () => clearInterval(interval);
     }
-  }, [testStatus, mode, selectedScenario]);
+  }, [testStatus, mode, selectedScenario, testType]);
+
 
   const renderContent = () => {
     const props = { 
