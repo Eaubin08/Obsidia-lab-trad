@@ -122,15 +122,30 @@ export function RiskRouter({ onNext }: { onNext: () => void }) {
             </button>
 
             {isExecuted && (
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                onClick={onNext}
-                className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 border border-zinc-700"
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
               >
-                View Trust Signals
-                <ArrowRight className="w-4 h-4" />
-              </motion.button>
+                <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl space-y-2">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    <span className="text-sm text-emerald-400 font-medium">Trade Executed Successfully</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 pt-2 border-t border-emerald-500/10">
+                    <span>REQUEST_HASH</span>
+                    <span className="text-zinc-300">0x${Math.random().toString(16).slice(2, 10)}...${Math.random().toString(16).slice(2, 6).toUpperCase()}</span>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={onNext}
+                  className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 border border-zinc-700"
+                >
+                  View Trust Signals
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </motion.div>
             )}
           </div>
 

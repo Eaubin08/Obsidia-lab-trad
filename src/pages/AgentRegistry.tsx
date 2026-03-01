@@ -29,7 +29,7 @@ export function AgentRegistry({ onNext }: { onNext: () => void }) {
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">Agent Handle</label>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <input 
                     type="text" 
                     placeholder="e.g. akaton-alpha-01"
@@ -40,9 +40,9 @@ export function AgentRegistry({ onNext }: { onNext: () => void }) {
                   <button 
                     onClick={() => setIsRegistered(true)}
                     disabled={!handle || isRegistered}
-                    className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold rounded-xl transition-all"
+                    className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold rounded-xl transition-all whitespace-nowrap"
                   >
-                    {isRegistered ? 'Registered' : 'Mint Handle'}
+                    {isRegistered ? 'Registered ✓' : 'Mint Handle'}
                   </button>
                 </div>
               </div>
@@ -74,15 +74,19 @@ export function AgentRegistry({ onNext }: { onNext: () => void }) {
 
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-4">
             <h3 className="text-lg font-semibold text-white">Registration JSON</h3>
-            <div className="bg-black rounded-xl p-4 font-mono text-xs text-zinc-500 overflow-x-auto">
+            <div className="bg-black rounded-xl p-4 font-mono text-[10px] sm:text-xs text-zinc-500 overflow-x-auto">
               <pre>{`{
+  "type": "ERC-8004_AGENT",
   "name": "${handle || 'pending'}",
+  "services": ["DEX_EXECUTION", "RISK_ROUTING"],
+  "x402Support": true,
+  "supportedTrust": ["TEE", "ZK_PROOF"],
   "capabilities": ["DEX_TRADING", "RISK_ANALYSIS"],
   "endpoints": {
     "rpc": "https://api.akaton.io/v1/agent",
     "status": "https://status.akaton.io/${handle || '...'}"
   },
-  "wallet": "0x742d...44e"
+  "agentWallet": "0x742d...44e"
 }`}</pre>
             </div>
           </div>

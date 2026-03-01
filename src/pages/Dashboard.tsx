@@ -130,6 +130,9 @@ export function Dashboard({ setActiveTab }: DashboardProps) {
               }`}>
                 {step.status}
               </span>
+              {step.status === 'LOCKED' && (
+                <span className="text-[8px] text-zinc-700 uppercase font-bold">Complete Prev Step</span>
+              )}
               <div className="flex gap-1">
                 {[1, 2, 3].map((dot) => (
                   <div key={dot} className={`w-1 h-1 rounded-full ${i >= dot - 1 ? 'bg-emerald-500' : 'bg-zinc-800'}`} />

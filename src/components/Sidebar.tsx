@@ -98,7 +98,18 @@ export function Sidebar({
         <div className="flex-1 overflow-y-auto py-6 px-4 space-y-6">
           {/* Mode Switcher */}
           <div className="space-y-2">
-            <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-3">Operation Mode</div>
+            <div className="flex items-center justify-between px-3">
+              <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Operation Mode</div>
+              <div className="group relative">
+                <Shield className="w-3 h-3 text-zinc-600 cursor-help" />
+                <div className="absolute right-0 bottom-full mb-2 w-48 p-2 bg-zinc-900 border border-zinc-800 rounded-lg text-[9px] text-zinc-400 invisible group-hover:visible z-50 shadow-xl">
+                  <p className="font-bold text-white mb-1">FIX: Manual Scenarios</p>
+                  <p className="mb-2">Test specific governance outcomes manually.</p>
+                  <p className="font-bold text-white mb-1">AUTO: Guided Workflow</p>
+                  <p>Follow the official Akaton Hackathon progression.</p>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-1 p-1 bg-zinc-900/50 rounded-lg border border-zinc-800/50">
               <button 
                 onClick={() => setMode('FIX')}
@@ -243,7 +254,7 @@ export function Sidebar({
               </div>
               <div className="flex items-center justify-between text-[9px] font-mono text-zinc-600 mt-1">
                 <span>L2_SYNC_ACTIVE</span>
-                <span>0x8F3A...9C2B</span>
+                <span>0x742d...44e</span>
               </div>
             </div>
           </div>

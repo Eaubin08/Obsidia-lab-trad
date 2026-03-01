@@ -14,9 +14,9 @@ import { Terminal } from './components/Terminal';
 import { cn } from './lib/utils';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('obsidia_active_tab') || 'dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [mode, setMode] = useState<'FIX' | 'AUTO'>('FIX');
+  const [mode, setMode] = useState<'FIX' | 'AUTO'>(() => (localStorage.getItem('obsidia_mode') as 'FIX' | 'AUTO') || 'AUTO');
   const [testType, setTestType] = useState<'AUTONOMOUS' | 'FIXED'>('FIXED');
   const [selectedScenario, setSelectedScenario] = useState(3);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
@@ -26,6 +26,14 @@ export default function App() {
   const [currentGate, setCurrentGate] = useState(0);
   const [outcome, setOutcome] = useState<any>(null);
   const [confidenceScore, setConfidenceScore] = useState(0);
+
+  useEffect(() => {
+    localStorage.setItem('obsidia_active_tab', activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    localStorage.setItem('obsidia_mode', mode);
+  }, [mode]);
 
   const addLog = (msg: string) => {
     setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
@@ -279,7 +287,7 @@ export default function App() {
           isTerminalOpen ? (isTerminalMaximized ? "pb-[90vh]" : "pb-[400px]") : "pb-12"
         )}>
           <div className="max-w-6xl mx-auto">
-            <WorkflowProgress activeTab={activeTab} />
+            <WorkflowProgress activeTab={activeTab} setActiveTab={setActiveTab} />
             {renderContent()}
           </div>
         </main>

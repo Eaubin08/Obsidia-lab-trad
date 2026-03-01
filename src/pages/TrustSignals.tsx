@@ -4,10 +4,10 @@ import { ShieldCheck, Activity, Award, CheckCircle2, AlertCircle, ArrowRight } f
 
 export function TrustSignals({ onNext }: { onNext: () => void }) {
   const signals = [
-    { id: 1, type: 'TRADE', status: 'VERIFIED', score: 98, time: '2m ago', desc: 'WETH/USDC Long Execution' },
-    { id: 2, type: 'AUDIT', status: 'VERIFIED', score: 100, time: '15m ago', desc: 'ERC-8004 Invariant Check' },
-    { id: 3, type: 'RISK', status: 'VERIFIED', score: 92, time: '1h ago', desc: 'Leverage Limit Validation' },
-    { id: 4, type: 'IDENTITY', status: 'VERIFIED', score: 100, time: '3h ago', desc: 'Agent Handle Minting' },
+    { id: 1, type: 'TRADE', status: 'VERIFIED', score: 98, time: '2m ago', desc: 'WETH/USDC Long Execution', hash: '0x7a2...f4e' },
+    { id: 2, type: 'AUDIT', status: 'VERIFIED', score: 100, time: '15m ago', desc: 'ERC-8004 Invariant Check', hash: '0x1b4...c9d' },
+    { id: 3, type: 'RISK', status: 'VERIFIED', score: 92, time: '1h ago', desc: 'Leverage Limit Validation', hash: '0x9d2...a1b' },
+    { id: 4, type: 'IDENTITY', status: 'VERIFIED', score: 100, time: '3h ago', desc: 'Agent Handle Minting', hash: '0x4c3...e8f' },
   ];
 
   return (
@@ -47,12 +47,18 @@ export function TrustSignals({ onNext }: { onNext: () => void }) {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-white uppercase tracking-tighter">{signal.desc}</h4>
-                      <p className="text-xs text-zinc-500">{signal.time} • {signal.type} EVENT</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{signal.time} • {signal.type} EVENT</span>
+                        <span className="text-[10px] font-mono text-zinc-600">[{signal.hash}]</span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <div className="text-sm font-mono font-bold text-white">{signal.score}%</div>
+                    <div className="text-right hidden sm:block">
+                      <div className="flex items-center gap-2 justify-end">
+                        <span className="text-sm font-mono font-bold text-white">{signal.score}</span>
+                        <span className="text-[8px] font-bold text-zinc-600 uppercase">/ 100</span>
+                      </div>
                       <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Validation Score</div>
                     </div>
                     <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">

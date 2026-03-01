@@ -24,10 +24,24 @@ export function Terminal({ isOpen, isMaximized, onToggleMaximize, onClose, onRun
 
   const handleCommand = (e: React.FormEvent) => {
     e.preventDefault();
-    const cmd = command.trim().toLowerCase();
-    if (cmd === 'npm test' || cmd === 'vitest') {
+    const cmd = command.trim();
+    if (!cmd) return;
+
+    // Add command to logs
+    logs.push(`$ ${cmd}`);
+    
+    const lowerCmd = cmd.toLowerCase();
+    if (lowerCmd === 'npm test' || lowerCmd === 'vitest') {
       onRunTest();
+    } else if (lowerCmd === 'clear') {
+      // In a real app we'd clear logs, but here we'll just add a note
+      logs.push('Terminal cleared.');
+    } else if (lowerCmd === 'help') {
+      logs.push('Available commands: npm test, clear, help');
+    } else {
+      logs.push(`Command not found: ${cmd}`);
     }
+    
     setCommand('');
   };
 
@@ -35,16 +49,16 @@ export function Terminal({ isOpen, isMaximized, onToggleMaximize, onClose, onRun
 
   return (
     <div className={cn(
-      "absolute bottom-0 left-0 right-0 z-[100] bg-black border-t border-zinc-800 transition-all duration-300 flex flex-col shadow-[0_-20px_50px_rgba(0,0,0,0.5)]",
-      isMaximized ? "h-[85vh]" : "h-[350px]"
+      "fixed bottom-0 left-0 right-0 z-[100] bg-black border-t border-zinc-800 transition-all duration-300 flex flex-col shadow-[0_-20px_50px_rgba(0,0,0,0.8)]",
+      isMaximized ? "h-[90vh] sm:h-[85vh]" : "h-[350px]"
     )}>
-      <div className="flex items-center justify-between px-4 py-2 bg-zinc-900/80 border-b border-zinc-800">
+      <div className="flex items-center justify-between px-4 py-2 bg-zinc-900 border-b border-zinc-800">
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 text-zinc-400">
+          <div className="flex items-center gap-2 text-emerald-500">
             <TerminalIcon className="w-4 h-4" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Terminal</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">Akaton Validation Shell</span>
           </div>
-          <div className="flex gap-4">
+          <div className="hidden sm:flex gap-4">
             {['Output', 'Debug Console', 'Terminal', 'Problems'].map((tab) => (
               <button 
                 key={tab}
@@ -58,16 +72,18 @@ export function Terminal({ isOpen, isMaximized, onToggleMaximize, onClose, onRun
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <button 
             onClick={onToggleMaximize}
             className="p-1.5 hover:bg-zinc-800 rounded-md text-zinc-500 hover:text-white transition-all"
+            title={isMaximized ? "Minimize" : "Maximize"}
           >
             {isMaximized ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
           <button 
             onClick={onClose}
-            className="p-1.5 hover:bg-zinc-800 rounded-md text-zinc-500 hover:text-white transition-all"
+            className="p-1.5 bg-red-500/10 hover:bg-red-500/20 rounded-md text-red-500 transition-all border border-red-500/20"
+            title="Close Terminal"
           >
             <X className="w-4 h-4" />
           </button>
