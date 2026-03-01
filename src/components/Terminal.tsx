@@ -96,7 +96,7 @@ export function Terminal({ isOpen, isMaximized, onToggleMaximize, onClose, onRun
       >
         {logs.length === 0 ? (
           <div className="text-zinc-700">
-            <p>Obsidia Governance Shell v1.0.4</p>
+            <p>Obsidia Governance Shell v1.0.5</p>
             <p className="mt-1">Type 'npm test' to start the governance validation suite.</p>
           </div>
         ) : (
@@ -110,12 +110,12 @@ export function Terminal({ isOpen, isMaximized, onToggleMaximize, onClose, onRun
                 log.startsWith('$') ? "text-zinc-200 font-bold" :
                 "text-zinc-500"
               )}>
-                {log.startsWith('$') ? (
+                {log && log.startsWith('$') ? (
                   <span className="text-emerald-500 shrink-0">user@obsidia:~/gov$</span>
                 ) : (
                   <span className="opacity-30 select-none shrink-0 w-4 text-right">{i + 1}</span>
                 )}
-                <span className="whitespace-pre-wrap">{log.replace(/^\$ /, '')}</span>
+                <span className="whitespace-pre-wrap">{log ? log.replace(/^\$ /, '') : ''}</span>
               </div>
             ))}
             {testStatus === 'RUNNING' && (
@@ -129,7 +129,9 @@ export function Terminal({ isOpen, isMaximized, onToggleMaximize, onClose, onRun
       </div>
 
       <form onSubmit={handleCommand} className="px-4 py-2 bg-zinc-950 border-t border-zinc-800 flex items-center gap-3">
-        <ChevronRight className="w-4 h-4 text-emerald-500" />
+        <button type="submit" className="p-1 hover:bg-zinc-800 rounded transition-colors group">
+          <ChevronRight className="w-4 h-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+        </button>
         <input 
           type="text" 
           value={command}

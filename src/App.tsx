@@ -35,13 +35,13 @@ export default function App() {
     localStorage.setItem('obsidia_mode', mode);
   }, [mode]);
 
-  const addLog = (msg: string, isCommand: boolean = false) => {
+  const addLog = React.useCallback((msg: string, isCommand: boolean = false) => {
     if (isCommand || msg.startsWith(' ') || msg.includes('PASS') || msg.includes('✓') || msg.includes('VERDICT')) {
       setLogs(prev => [...prev, msg]);
     } else {
       setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
     }
-  };
+  }, []);
 
   const runTest = () => {
     setTestStatus('RUNNING');
@@ -52,7 +52,7 @@ export default function App() {
     
     // Add the test header
     addLog(` `, true);
-    addLog(`> obsidia-governance-os@1.0.4 test`, true);
+    addLog(`> obsidia-governance-os@1.0.5 test`, true);
     addLog(`Running ERC-8004 governance validation suite...`, true);
     
     if (testType === 'AUTONOMOUS') {
@@ -167,7 +167,7 @@ export default function App() {
 
       return () => clearInterval(interval);
     }
-  }, [testStatus, mode, selectedScenario, testType]);
+  }, [testStatus, mode, selectedScenario, testType, addLog]);
 
 
   const renderContent = () => {

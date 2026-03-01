@@ -91,8 +91,8 @@ export function AgentRegistry({ onNext }: { onNext: () => void }) {
 
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-4">
             <h3 className="text-lg font-semibold text-white">Registration JSON</h3>
-            <div className="bg-black rounded-xl p-4 font-mono text-[10px] sm:text-xs text-zinc-500 overflow-x-auto">
-              <pre>{JSON.stringify(registrationData, null, 2)}</pre>
+            <div className="bg-black rounded-xl p-4 font-mono text-[10px] sm:text-xs text-zinc-500 overflow-x-auto border border-zinc-800/50">
+              <pre className="whitespace-pre">{JSON.stringify(registrationData, null, 2)}</pre>
             </div>
           </div>
         </div>
