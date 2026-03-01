@@ -47,12 +47,14 @@ export default function App() {
     setTestStatus('RUNNING');
     setCurrentGate(0);
     setOutcome(null);
-    setLogs([]);
     setConfidenceScore(0);
     setIsTerminalOpen(true);
-    addLog(`RUN  v1.0.4 /home/user/obsidia-gov`, true);
-    addLog(`❯ tests/akaton/${testType === 'AUTONOMOUS' ? 'AutonomousAudit' : 'FixedValidation'}.test.ts`, true);
+    
+    // Don't clear logs, just add the test header
     addLog(` `, true);
+    addLog(`> obsidia-governance-os@1.0.4 test`, true);
+    addLog(`Running ERC-8004 governance validation suite...`, true);
+    
     if (testType === 'AUTONOMOUS') {
       addLog('  [AI] Initializing Akaton Autonomous Audit Agent...');
       addLog('  [AI] Scanning for ERC-8004 Invariant Breaches...');
@@ -72,12 +74,10 @@ export default function App() {
           logs: isAuto ? [
             '  [AI] Analyzing Akaton attack vectors in OS0 layer...',
             '  [AI] Heuristic evaluation of Akaton model weights: STABLE',
-            '  [AI] Detecting potential drift in Akaton invariant definitions...',
-            '  ✓ Integrity Gate > Akaton Neural Signature Verified (42ms)',
+            '  ✓ Identity Registry (ERC-721) — PASS',
             '  PASS  src/gates/akaton/Integrity.gate.ts'
           ] : [
-            '  ✓ Integrity Gate > Akaton Schema Validation (42ms)',
-            '  ✓ Integrity Gate > Akaton Signature Verification (12ms)',
+            '  ✓ Identity Registry (ERC-721) — PASS',
             '  PASS  src/gates/akaton/Integrity.gate.ts'
           ]
         },
@@ -87,13 +87,10 @@ export default function App() {
           logs: isAuto ? [
             '  [AI] Simulating Akaton adversarial prompt injection...',
             '  [AI] Cross-referencing with Akaton ERC-8004 compliance matrix...',
-            '  [AI] Evaluating Akaton temporal lock-in risk factors...',
-            '  ✓ Temporal Gate > Akaton X-108 Lock Status (5ms)',
-            '  ✓ Temporal Gate > Akaton Volatility Analysis (88ms)',
+            '  ✓ Capital Vault (x402) — PASS',
             '  PASS  src/gates/akaton/Temporal.gate.ts'
           ] : [
-            '  ✓ Temporal Gate > Akaton X-108 Lock Status (5ms)',
-            '  ✓ Temporal Gate > Akaton Volatility Analysis (88ms)',
+            '  ✓ Capital Vault (x402) — PASS',
             '  PASS  src/gates/akaton/Temporal.gate.ts'
           ]
         },
@@ -103,13 +100,12 @@ export default function App() {
           logs: isAuto ? [
             '  [AI] Validating Akaton zero-knowledge proofs for state transitions...',
             '  [AI] Stress testing Akaton governance invariants...',
-            '  [AI] Akaton Monte Carlo simulation: 10,000 iterations completed.',
-            '  ✓ Risk Gate > Akaton SIM-LITE 10k Run (1240ms)',
-            '  ✓ Risk Gate > Akaton Ruin Probability < 0.01% (4ms)',
+            '  ✓ Risk Router (EIP-712) — PASS',
+            '  ✓ Trust Signals — PASS',
             '  PASS  src/gates/akaton/Risk.gate.ts'
           ] : [
-            '  ✓ Risk Gate > Akaton SIM-LITE 10k Run (1240ms)',
-            '  ✓ Risk Gate > Akaton Ruin Probability < 1% (4ms)',
+            '  ✓ Risk Router (EIP-712) — PASS',
+            '  ✓ Trust Signals — PASS',
             '  PASS  src/gates/akaton/Risk.gate.ts'
           ]
         },
@@ -119,8 +115,8 @@ export default function App() {
           logs: [
             ' ', 
             'Test Files  3 passed (3)', 
-            'Tests       ' + (isAuto ? '12' : '6') + ' passed (' + (isAuto ? '12' : '6') + ')', 
-            'Time        1.84s', 
+            'Tests       4 passed (4)', 
+            'Time        1.2s', 
             ' ', 
             'Finalizing Akaton ERC-8004 Artifact...'
           ] 

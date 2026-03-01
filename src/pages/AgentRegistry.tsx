@@ -35,7 +35,10 @@ export function AgentRegistry({ onNext }: { onNext: () => void }) {
                     placeholder="e.g. akaton-alpha-01"
                     className="flex-1 bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
                     value={handle}
-                    onChange={(e) => setHandle(e.target.value)}
+                    onChange={(e) => {
+                      setHandle(e.target.value);
+                      if (isRegistered) setIsRegistered(false);
+                    }}
                   />
                   <button 
                     onClick={() => setIsRegistered(true)}
