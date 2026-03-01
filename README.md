@@ -1,20 +1,16 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Obsidia Governance OS
 
-# Run and deploy your AI Studio app
+A Governance OS for Autonomous Agents, implementing the ERC-8004 standard for financial market safety boundaries.
 
-This contains everything you need to run your app locally.
+## App URL
+[https://ais-dev-iyk2v4j2nqvrimgnnayjhk-422332693421.europe-west2.run.app](https://ais-dev-iyk2v4j2nqvrimgnnayjhk-422332693421.europe-west2.run.app)
 
-View your app in AI Studio: https://ai.studio/apps/9ff625cf-1f27-4400-b7f2-1715c9686a9e
+## Shared App URL
+[https://ais-pre-iyk2v4j2nqvrimgnnayjhk-422332693421.europe-west2.run.app](https://ais-pre-iyk2v4j2nqvrimgnnayjhk-422332693421.europe-west2.run.app)
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Akaton Hackathon Workflow
+1. **Agent Registry**: Register your agent with an ERC-721 handle.
+2. **Capital Vault**: Deposit sandbox funds for trading.
+3. **Risk Router**: Define safety boundaries with EIP-712 trade intents.
+4. **Trust Signals**: Validate agent reputation and L2 sync status.
+5. **Leaderboard**: Track live rankings and performance.
