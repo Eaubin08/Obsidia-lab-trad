@@ -1,0 +1,6 @@
+// data/trading/BTC_1h.json
+[
+  {"timestamp": 1709337600, "open": 62000, "high": 63000, "low": 61500, "close": 62500, "volume": 1200},
+  {"timestamp": 1709341200, "open": 62500, "high": 64000, "low": 62000, "close": 63800, "volume": 1500},
+  {"timestamp": 1709344800, "open": 63800, "high": 64500, "low": 63500, "close": 64200, "volume": 1100}
+]

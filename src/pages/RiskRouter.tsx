@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { ShieldAlert, Zap, FileJson, CheckCircle2, AlertTriangle, Send, ArrowRight } from 'lucide-react';
+import SignalsPanel from '../components/SignalsPanel';
 
 export function RiskRouter({ onNext }: { onNext: () => void }) {
   const [isExecuting, setIsExecuting] = useState(false);
@@ -29,6 +30,8 @@ export function RiskRouter({ onNext }: { onNext: () => void }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+          <SignalsPanel />
+
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">

@@ -43,7 +43,7 @@ export default function App() {
     }
   }, []);
 
-  const runTest = () => {
+  const runTest = async () => {
     setTestStatus('RUNNING');
     setCurrentGate(0);
     setOutcome(null);
@@ -62,51 +62,46 @@ export default function App() {
       addLog('  [FIX] Loading Akaton Deterministic Validation Rules...');
       addLog('  [FIX] Verifying Akaton Compliance Gates...');
     }
-  };
 
-  useEffect(() => {
-    if (testStatus === 'RUNNING') {
-      const isAuto = testType === 'AUTONOMOUS';
+    try {
+      // Fetch real data from API
+      const [featuresRes, simulationRes, gatesRes] = await Promise.all([
+        fetch('/api/features', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) }),
+        fetch('/api/simulation', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ asset: 'ETH', amount: 2000, action: 'BUY' }) }),
+        fetch('/api/gates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+      ]);
+
+      const features = await featuresRes.json();
+      const simulation = await simulationRes.json();
+      const gates = await gatesRes.json();
+
+      // Start the visual sequence
       const steps = [
         { 
           gate: 0, 
           confidence: 32,
-          logs: isAuto ? [
-            '  [AI] Analyzing Akaton attack vectors in OS0 layer...',
-            '  [AI] Heuristic evaluation of Akaton model weights: STABLE',
-            '  ✓ Identity Registry (ERC-721) — PASS',
-            '  PASS  src/gates/akaton/Integrity.gate.ts'
-          ] : [
-            '  ✓ Identity Registry (ERC-721) — PASS',
-            '  PASS  src/gates/akaton/Integrity.gate.ts'
+          logs: [
+            `  [DATA] Volatility: ${(features.volatility * 100).toFixed(2)}% | Coherence: ${(features.coherence * 100).toFixed(2)}%`,
+            `  ✓ ${gates[0].name} — ${gates[0].status}`,
+            `  PASS  src/gates/akaton/Integrity.gate.ts`
           ]
         },
         { 
           gate: 1, 
           confidence: 64,
-          logs: isAuto ? [
-            '  [AI] Simulating Akaton adversarial prompt injection...',
-            '  [AI] Cross-referencing with Akaton ERC-8004 compliance matrix...',
-            '  ✓ Capital Vault (x402) — PASS',
-            '  PASS  src/gates/akaton/Temporal.gate.ts'
-          ] : [
-            '  ✓ Capital Vault (x402) — PASS',
-            '  PASS  src/gates/akaton/Temporal.gate.ts'
+          logs: [
+            `  [SIM] Expected Return: ${(simulation.expectedReturn * 100).toFixed(2)}% | Max DD: ${(simulation.maxDrawdown * 100).toFixed(2)}%`,
+            `  ✓ ${gates[1].name} — ${gates[1].status}`,
+            `  PASS  src/gates/akaton/Temporal.gate.ts`
           ]
         },
         { 
           gate: 2, 
           confidence: 89,
-          logs: isAuto ? [
-            '  [AI] Validating Akaton zero-knowledge proofs for state transitions...',
-            '  [AI] Stress testing Akaton governance invariants...',
-            '  ✓ Risk Router (EIP-712) — PASS',
-            '  ✓ Trust Signals — PASS',
-            '  PASS  src/gates/akaton/Risk.gate.ts'
-          ] : [
-            '  ✓ Risk Router (EIP-712) — PASS',
-            '  ✓ Trust Signals — PASS',
-            '  PASS  src/gates/akaton/Risk.gate.ts'
+          logs: [
+            `  ✓ ${gates[2].name} — ${gates[2].status}`,
+            `  ✓ Trust Signals — PASS`,
+            `  PASS  src/gates/akaton/Risk.gate.ts`
           ]
         },
         { 
@@ -142,32 +137,21 @@ export default function App() {
           setTestStatus('COMPLETED');
           setConfidenceScore(100);
           
-          const scenarios = [
-            { id: 1, outcome: 'BLOCK', reason: 'G1 Integrity Failure' },
-            { id: 2, outcome: 'HOLD', reason: 'G2 Temporal Lock Active' },
-            { id: 3, outcome: 'EXECUTE', reason: 'All Gates Verified' },
-            { id: 4, outcome: 'BLOCK', reason: 'G3 Risk Threshold Exceeded' },
-            { id: 5, outcome: 'EXECUTE', reason: 'All Gates Verified' },
-          ];
-
-          if (mode === 'FIX') {
-            const s = scenarios.find(sc => sc.id === selectedScenario);
-            setOutcome(s || scenarios[2]);
-            addLog(` `);
-            addLog(`VERDICT: ${s?.outcome || 'EXECUTE'}`);
-          } else {
-            const random = Math.random();
-            let res = random > 0.7 ? scenarios[0] : random > 0.5 ? scenarios[1] : scenarios[2];
-            setOutcome(res);
-            addLog(` `);
-            addLog(`VERDICT: ${res.outcome}`);
-          }
+          const finalVerdict = gates.every((g: any) => g.status === 'PASS') ? 'EXECUTE' : 'BLOCK';
+          const reason = gates.find((g: any) => g.status !== 'PASS')?.reason || 'All Gates Verified';
+          
+          setOutcome({ outcome: finalVerdict, reason });
+          addLog(` `);
+          addLog(`VERDICT: ${finalVerdict}`);
+          addLog(`REASON: ${reason}`);
         }
       }, 1500);
 
-      return () => clearInterval(interval);
+    } catch (error) {
+      addLog(`  [ERROR] Failed to fetch governance data: ${error}`);
+      setTestStatus('IDLE');
     }
-  }, [testStatus, mode, selectedScenario, testType, addLog]);
+  };
 
 
   const renderContent = () => {

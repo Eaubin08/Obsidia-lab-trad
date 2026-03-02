@@ -45,6 +45,29 @@ export function OS4Reports({
     onRunTest();
   };
 
+  const handleExport = async () => {
+    try {
+      const res = await fetch('/api/artifacts');
+      const data = await res.json();
+      
+      // Create a blob and download it as JSON
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `obsidia-artifact-${data.artifactId}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      alert('Artifact exported successfully!');
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Failed to export artifact.');
+    }
+  };
+
   return (
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -59,7 +82,10 @@ export function OS4Reports({
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="bg-white text-black px-6 py-3 rounded-2xl flex items-center gap-3 font-black text-xs uppercase tracking-widest hover:bg-zinc-200 transition-colors shadow-xl shadow-white/10">
+          <button 
+            onClick={handleExport}
+            className="bg-white text-black px-6 py-3 rounded-2xl flex items-center gap-3 font-black text-xs uppercase tracking-widest hover:bg-zinc-200 transition-colors shadow-xl shadow-white/10"
+          >
             <Download className="w-4 h-4" />
             Export All
           </button>

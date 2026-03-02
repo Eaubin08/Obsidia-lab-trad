@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Wallet, Landmark, TrendingUp, ArrowRight, CheckCircle2 } from 'lucide-react';
+import StrategyPanel from '../components/StrategyPanel';
 
 export function CapitalVault({ onNext }: { onNext: () => void }) {
   const [isClaimed, setIsClaimed] = useState(false);
@@ -15,7 +16,7 @@ export function CapitalVault({ onNext }: { onNext: () => void }) {
     <div className="space-y-8">
       <div className="flex flex-col gap-2">
         <h2 className="text-3xl font-bold tracking-tight text-white">Capital Vault</h2>
-        <p className="text-zinc-400">Step 2: Claim your funded sub-account in the Hackathon Capital Vault.</p>
+        <p className="text-zinc-400">Step 2: Claim your funded sub-account and review your agent's strategy.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -49,6 +50,8 @@ export function CapitalVault({ onNext }: { onNext: () => void }) {
               </motion.button>
             )}
           </div>
+
+          <StrategyPanel />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-4">
