@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { computeVolatility } from '../../lib/features/volatility';
+import { motion } from 'motion/react';
+import { Activity, Target, Zap, TrendingUp, BarChart3 } from 'lucide-react';
 
 export default function SignalsPanel({ scenarioId, mode }: { scenarioId?: string, mode?: 'FIX' | 'AUTO' }) {
   const [signals, setSignals] = useState<{
@@ -24,7 +25,7 @@ export default function SignalsPanel({ scenarioId, mode }: { scenarioId?: string
         setSignals({
           volatility: data.volatility,
           coherence: data.coherence,
-          rsi: 28.5, // Mock RSI as it's not in the API yet
+          rsi: 28.5,
           ma7: 62450,
           ma30: 61800,
           status: 'READY'
@@ -33,54 +34,66 @@ export default function SignalsPanel({ scenarioId, mode }: { scenarioId?: string
       .catch(err => console.error('Error fetching features:', err));
   }, [scenarioId, mode]);
 
-  if (!signals) return <div className="animate-pulse text-gray-500">Extraction des signaux en cours...</div>;
-
-  return (
-    <div className="bg-gray-900 p-6 rounded-lg border border-blue-500/30 shadow-lg mt-4">
-      <h3 className="text-xl font-bold mb-4 text-blue-400 flex items-center gap-2">
-        <span className="text-2xl">🎯</span> Intention de Trade (OS1)
-      </h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-black/40 p-3 rounded border border-white/5 text-center">
-          <div className="text-xs text-gray-400 uppercase mb-1">Action</div>
-          <div className="text-lg font-bold text-green-400">ACHETER ETH</div>
-        </div>
-        <div className="bg-black/40 p-3 rounded border border-white/5 text-center">
-          <div className="text-xs text-gray-400 uppercase mb-1">Montant</div>
-          <div className="text-lg font-bold text-white">2 000 $ (20%)</div>
-        </div>
-        <div className="bg-black/40 p-3 rounded border border-white/5 text-center">
-          <div className="text-xs text-gray-400 uppercase mb-1">Raison</div>
-          <div className="text-lg font-bold text-blue-400">RSI &lt; 30</div>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Features Extraites</h4>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-gray-800/50 p-2 rounded border border-white/10">
-            <div className="text-[10px] text-gray-500 uppercase">Volatilité</div>
-            <div className="text-sm font-mono text-white">{(signals.volatility * 100).toFixed(2)}%</div>
-          </div>
-          <div className="bg-gray-800/50 p-2 rounded border border-white/10">
-            <div className="text-[10px] text-gray-500 uppercase">Cohérence</div>
-            <div className="text-sm font-mono text-white">{(signals.coherence * 100).toFixed(2)}%</div>
-          </div>
-          <div className="bg-gray-800/50 p-2 rounded border border-white/10">
-            <div className="text-[10px] text-gray-500 uppercase">RSI (14)</div>
-            <div className="text-sm font-mono text-green-400">{signals.rsi.toFixed(1)}</div>
-          </div>
-          <div className="bg-gray-800/50 p-2 rounded border border-white/10">
-            <div className="text-[10px] text-gray-500 uppercase">MA (7)</div>
-            <div className="text-sm font-mono text-white">{signals.ma7.toLocaleString()}</div>
-          </div>
-          <div className="bg-gray-800/50 p-2 rounded border border-white/10">
-            <div className="text-[10px] text-gray-500 uppercase">MA (30)</div>
-            <div className="text-sm font-mono text-white">{signals.ma30.toLocaleString()}</div>
-          </div>
-        </div>
+  if (!signals) return (
+    <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 flex items-center justify-center">
+      <div className="flex items-center gap-3 text-zinc-500 animate-pulse">
+        <Activity className="w-5 h-5" />
+        <span className="text-xs font-black uppercase tracking-widest">Extraction des signaux...</span>
       </div>
     </div>
+  );
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 backdrop-blur-sm"
+    >
+      <div className="flex items-center justify-between mb-8">
+        <h3 className="text-xl font-black italic uppercase tracking-tighter text-white flex items-center gap-3">
+          <Target className="w-6 h-6 text-blue-400" />
+          Intention de Trade (OS1)
+        </h3>
+        <div className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-black uppercase tracking-widest text-blue-400">
+          Signal Detected
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="bg-black/40 p-4 rounded-2xl border border-zinc-800/50 text-center">
+          <div className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">Action</div>
+          <div className="text-lg font-black italic uppercase tracking-tighter text-emerald-400">ACHETER ETH</div>
+        </div>
+        <div className="bg-black/40 p-4 rounded-2xl border border-zinc-800/50 text-center">
+          <div className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">Montant</div>
+          <div className="text-lg font-black italic uppercase tracking-tighter text-white">2 000 $ (20%)</div>
+        </div>
+        <div className="bg-black/40 p-4 rounded-2xl border border-zinc-800/50 text-center">
+          <div className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">Raison</div>
+          <div className="text-lg font-black italic uppercase tracking-tighter text-blue-400">RSI &lt; 30</div>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
+          <BarChart3 className="w-4 h-4 text-blue-400" />
+          Features Extraites
+        </h4>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          {[
+            { label: 'Volatilité', value: `${(signals.volatility * 100).toFixed(2)}%`, color: 'text-white' },
+            { label: 'Cohérence', value: `${(signals.coherence * 100).toFixed(2)}%`, color: 'text-white' },
+            { label: 'RSI (14)', value: signals.rsi.toFixed(1), color: 'text-emerald-400' },
+            { label: 'MA (7)', value: signals.ma7.toLocaleString(), color: 'text-white' },
+            { label: 'MA (30)', value: signals.ma30.toLocaleString(), color: 'text-white' },
+          ].map((f) => (
+            <div key={f.label} className="bg-zinc-900/50 p-3 rounded-xl border border-zinc-800/50">
+              <div className="text-[8px] text-zinc-500 uppercase font-black tracking-widest mb-1">{f.label}</div>
+              <div className={`text-xs font-mono font-bold ${f.color}`}>{f.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
   );
 }

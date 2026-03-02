@@ -4,8 +4,8 @@ import { OS4Reports } from './pages/OS4Reports';
 import { WorkflowProgress } from './components/WorkflowProgress';
 import { Dashboard } from './pages/Dashboard';
 import { HomeDashboard } from './pages/HomeDashboard';
-import { BankingPlaceholder } from './pages/BankingPlaceholder';
-import { EcommercePlaceholder } from './pages/EcommercePlaceholder';
+import { BankingModule } from './pages/BankingModule';
+import { EcommerceModule } from './pages/EcommerceModule';
 import { AgentRegistry } from './pages/AgentRegistry';
 import { CapitalVault } from './pages/CapitalVault';
 import { RiskRouter } from './pages/RiskRouter';
@@ -208,8 +208,8 @@ export default function App() {
             switch (activeTab) {
               case 'home': return <HomeDashboard setActiveTab={setActiveTab} />;
               case 'dashboard': return <Dashboard setActiveTab={setActiveTab} />;
-              case 'banking': return <BankingPlaceholder setActiveTab={setActiveTab} />;
-              case 'ecommerce': return <EcommercePlaceholder setActiveTab={setActiveTab} />;
+              case 'banking': return <BankingModule setActiveTab={setActiveTab} />;
+              case 'ecommerce': return <EcommerceModule setActiveTab={setActiveTab} />;
               case 'step1': return <AgentRegistry onNext={() => setActiveTab('step2')} />;
               case 'step2': return <CapitalVault onNext={() => setActiveTab('step3')} />;
               case 'step3': return <RiskRouter onNext={() => setActiveTab('step4')} scenarioId={selectedScenario} mode={mode} />;
