@@ -17,6 +17,7 @@ import {
   BarChart3,
   Scale
 } from 'lucide-react';
+import { ModuleHeader } from '../components/ModuleHeader';
 
 interface DashboardProps {
   setActiveTab: (tab: string) => void;
@@ -73,6 +74,13 @@ export function Dashboard({ setActiveTab }: DashboardProps) {
 
   return (
     <div className="space-y-10 pb-20">
+      <ModuleHeader 
+        moduleName="Trading" 
+        moduleIcon="📈" 
+        currentPage="Dashboard" 
+        progress={20}
+      />
+
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-3xl bg-zinc-900/40 border border-zinc-800/50 p-8 md:p-12">
         <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none">

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Wallet, Landmark, TrendingUp, ArrowRight, CheckCircle2 } from 'lucide-react';
 import StrategyPanel from '../components/StrategyPanel';
+import { ModuleHeader } from '../components/ModuleHeader';
 
 export function CapitalVault({ onNext }: { onNext: () => void }) {
   const [isClaimed, setIsClaimed] = useState(false);
@@ -14,10 +15,12 @@ export function CapitalVault({ onNext }: { onNext: () => void }) {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold tracking-tight text-white">Capital Vault</h2>
-        <p className="text-zinc-400">Step 2: Claim your funded sub-account and review your agent's strategy.</p>
-      </div>
+      <ModuleHeader 
+        moduleName="Trading" 
+        moduleIcon="📈" 
+        currentPage="Capital Vault" 
+        progress={50}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">

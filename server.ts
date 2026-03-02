@@ -3,6 +3,7 @@ import { createServer as createViteServer } from "vite";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { GoogleGenAI } from "@google/genai";
 
 // Logic imports
 import { computeVolatility, MarketData } from "./lib/features/volatility";
@@ -15,15 +16,32 @@ import { x108TemporalLock } from "./lib/gates/x108TemporalLock";
 import { riskKillswitch } from "./lib/gates/riskKillswitch";
 import { INVARIANTS } from "./lib/core/invariants";
 
+// Banking imports
+import { 
+  calculateMetrics as calculateBankingMetrics, 
+  runOntologicalTests, 
+  makeDecision as makeBankingDecision 
+} from "./lib/banking/engine";
+
+// E-commerce imports
+import { 
+  evaluateAction as evaluateEcommerceAction, 
+  calculateFees as calculateEcommerceFees 
+} from "./lib/ecommerce/safetyGate";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load market data
 const marketDataPath = path.join(__dirname, "data/trading/BTC_1h.json");
 const scenariosPath = path.join(__dirname, "data/scenarios.json");
+const bankingScenariosPath = path.join(__dirname, "data/banking/scenarios.json");
+const ecommerceScenariosPath = path.join(__dirname, "data/ecommerce/scenarios.json");
 
 let marketData: MarketData[] = [];
 let scenarios: any[] = [];
+let bankingScenarios: any[] = [];
+let ecommerceScenarios: any[] = [];
 
 try {
   const rawData = fs.readFileSync(marketDataPath, "utf-8");
@@ -37,6 +55,20 @@ try {
   scenarios = JSON.parse(rawScenarios);
 } catch (e) {
   console.error("Failed to load scenarios:", e);
+}
+
+try {
+  const rawBanking = fs.readFileSync(bankingScenariosPath, "utf-8");
+  bankingScenarios = JSON.parse(rawBanking);
+} catch (e) {
+  console.error("Failed to load banking scenarios:", e);
+}
+
+try {
+  const rawEcommerce = fs.readFileSync(ecommerceScenariosPath, "utf-8");
+  ecommerceScenarios = JSON.parse(rawEcommerce);
+} catch (e) {
+  console.error("Failed to load ecommerce scenarios:", e);
 }
 
 async function startServer() {
@@ -102,6 +134,71 @@ async function startServer() {
       marketData
     );
     res.json(result);
+  });
+
+  // Banking Routes
+  app.get("/api/banking/scenarios", (req, res) => {
+    res.json(bankingScenarios);
+  });
+
+  app.post("/api/banking/process", (req, res) => {
+    const { transaction } = req.body;
+    const metrics = calculateBankingMetrics(transaction);
+    const tests = runOntologicalTests(transaction, metrics);
+    const decision = makeBankingDecision(metrics, tests);
+    res.json({ metrics, tests, decision });
+  });
+
+  app.post("/api/banking/gemini", async (req, res) => {
+    const { decision, metrics, transaction } = req.body;
+    const apiKey = process.env.GEMINI_API_KEY;
+    
+    if (!apiKey) {
+      return res.status(500).json({ error: "GEMINI_API_KEY not configured" });
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+    const prompt = `
+      Explain why this banking transaction was ${decision.decision} based on the following metrics:
+      - IR (Irreversibility): ${metrics.IR.toFixed(2)}
+      - CIZ (Conflict Zone): ${metrics.CIZ.toFixed(2)}
+      - DTS (Time Sensitivity): ${metrics.DTS.toFixed(2)}
+      - TSG (Total Guard): ${metrics.TSG.toFixed(2)}
+      
+      Transaction Details:
+      - Amount: ${transaction.amount} ${transaction.currency}
+      - Sender: ${transaction.sender}
+      - Recipient: ${transaction.recipient}
+      - Type: ${transaction.type}
+
+      Provide a professional and concise justification for a bank administrator.
+    `;
+
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-1.5-flash-latest",
+        contents: prompt,
+      });
+      res.json({ justification: response.text || "No justification generated." });
+    } catch (error) {
+      console.error("Error generating justification:", error);
+      res.status(500).json({ error: "Error generating justification via Gemini AI." });
+    }
+  });
+
+  // E-commerce Routes
+  app.get("/api/ecommerce/scenarios", (req, res) => {
+    res.json(ecommerceScenarios);
+  });
+
+  app.post("/api/ecommerce/evaluate", (req, res) => {
+    const { action, previousAction, model } = req.body;
+    const result = evaluateEcommerceAction(action, previousAction);
+    let fees = null;
+    if (result.decision === 'ALLOW') {
+      fees = calculateEcommerceFees(action.amount, model);
+    }
+    res.json({ result, fees });
   });
 
   app.post("/api/gates", async (req, res) => {

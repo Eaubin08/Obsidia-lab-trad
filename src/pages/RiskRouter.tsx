@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { ShieldAlert, Zap, FileJson, CheckCircle2, AlertTriangle, Send, ArrowRight } from 'lucide-react';
 import SignalsPanel from '../components/SignalsPanel';
+import { ModuleHeader } from '../components/ModuleHeader';
 
 export function RiskRouter({ onNext, scenarioId, mode }: { onNext: () => void, scenarioId?: string, mode?: 'FIX' | 'AUTO' }) {
   const [isExecuting, setIsExecuting] = useState(false);
@@ -23,10 +24,12 @@ export function RiskRouter({ onNext, scenarioId, mode }: { onNext: () => void, s
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold tracking-tight text-white">Risk Router</h2>
-        <p className="text-zinc-400">Step 3: Submit signed TradeIntents (EIP-712) for execution.</p>
-      </div>
+      <ModuleHeader 
+        moduleName="Trading" 
+        moduleIcon="📈" 
+        currentPage="Risk Router" 
+        progress={65}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">

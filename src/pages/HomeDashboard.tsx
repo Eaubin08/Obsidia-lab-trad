@@ -1,19 +1,16 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { 
-  TrendingUp, 
-  Landmark, 
-  ShoppingCart, 
   Shield, 
   Activity, 
   Users, 
-  Zap,
-  ArrowRight,
   Globe,
   Lock,
-  BarChart3
+  BarChart3,
+  Rocket
 } from 'lucide-react';
 import { DOMAINS } from '../config/domains';
+import { DomainCard } from '../components/DomainCard';
 
 interface HomeDashboardProps {
   setActiveTab: (tab: string) => void;
@@ -21,10 +18,10 @@ interface HomeDashboardProps {
 
 export function HomeDashboard({ setActiveTab }: HomeDashboardProps) {
   const stats = [
-    { label: 'Domaines Actifs', value: '3', icon: Globe, color: 'text-blue-400' },
-    { label: 'Agents Déployés', value: '1,284', icon: Users, color: 'text-emerald-400' },
-    { label: 'Transactions 24h', value: '42.8k', icon: Activity, color: 'text-purple-400' },
-    { label: 'Score de Sécurité', value: '98.2%', icon: Shield, color: 'text-amber-400' },
+    { label: 'Domains', value: '3', icon: Globe, color: 'text-blue-400' },
+    { label: 'Agents', value: '142', icon: Users, color: 'text-emerald-400' },
+    { label: 'Transactions', value: '8.4K', icon: Activity, color: 'text-purple-400' },
+    { label: 'Global Score', value: '96.4', icon: Shield, color: 'text-amber-400' },
   ];
 
   const handleDomainClick = (id: string) => {
@@ -36,128 +33,104 @@ export function HomeDashboard({ setActiveTab }: HomeDashboardProps) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
+    <div className="max-w-7xl mx-auto px-6 py-12">
       {/* Hero Section */}
-      <div className="mb-16 text-center">
+      <div className="text-center max-w-4xl mx-auto mb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/40">
-            OBSIDIA MISSION CONTROL
-          </h1>
-          <p className="text-xl text-zinc-400 max-w-2xl mx-auto font-light leading-relaxed">
-            Gouvernance décentralisée et sécurité structurelle pour les agents autonomes à travers les domaines critiques.
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-8">
+            <Rocket className="w-3.5 h-3.5" />
+            Platform v1.0 — Akaton, Launch Fund & Arc+Circle Hackathons
+          </div>
+          
+          <h2 className="text-6xl md:text-8xl font-black mb-8 leading-[0.9] tracking-tighter uppercase italic">
+            <span className="bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Gouvernance IA
+            </span>
+            <br />
+            <span className="text-white">Multi-Domaines</span>
+          </h2>
+          
+          <p className="text-xl text-zinc-400 leading-relaxed font-light max-w-2xl mx-auto">
+            Sélectionnez un domaine pour accéder aux outils de gouvernance autonome
+            avec <strong className="text-white font-medium">validation on-chain</strong>, <strong className="text-white font-medium">audit complet</strong> et <strong className="text-white font-medium">traçabilité immuable</strong>.
           </p>
         </motion.div>
       </div>
 
+      {/* Domain Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
+        {(Object.keys(DOMAINS) as Array<keyof typeof DOMAINS>).map((id, index) => {
+          const domain = DOMAINS[id];
+          return (
+            <div key={id}>
+              <DomainCard
+                id={domain.id}
+                name={domain.name}
+                icon={domain.icon}
+                tagline={domain.tagline}
+                description={domain.description}
+                features={domain.features as unknown as string[]}
+                status={domain.status}
+                route={domain.route}
+                gradient={domain.gradient}
+                onClick={() => handleDomainClick(id)}
+                index={index}
+              />
+            </div>
+          );
+        })}
+      </div>
+
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-24 border-y border-zinc-800/50 py-12">
         {stats.map((stat, index) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl backdrop-blur-sm"
+            transition={{ delay: 0.6 + index * 0.1 }}
+            className="flex flex-col items-center md:items-start"
           >
             <div className="flex items-center gap-3 mb-2">
-              <stat.icon className={`w-5 h-5 ${stat.color}`} />
-              <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{stat.label}</span>
+              <stat.icon className={`w-4 h-4 ${stat.color}`} />
+              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{stat.label}</span>
             </div>
-            <div className="text-3xl font-bold text-white">{stat.value}</div>
+            <div className="text-4xl font-black text-white tracking-tighter italic">{stat.value}</div>
           </motion.div>
         ))}
       </div>
 
-      {/* Domain Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {(Object.keys(DOMAINS) as Array<keyof typeof DOMAINS>).map((id, index) => {
-          const domain = DOMAINS[id];
-          const Icon = id === 'trading' ? TrendingUp : id === 'banking' ? Landmark : ShoppingCart;
-          
-          return (
-            <motion.div
-              key={id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4 + index * 0.1 }}
-              whileHover={{ y: -8, transition: { duration: 0.2 } }}
-              onClick={() => handleDomainClick(id)}
-              className="group relative cursor-pointer"
-            >
-              <div className={`absolute inset-0 bg-gradient-to-br ${
-                id === 'trading' ? 'from-emerald-500/20 to-transparent' : 
-                id === 'banking' ? 'from-blue-500/20 to-transparent' : 
-                'from-orange-500/20 to-transparent'
-              } rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-              
-              <div className="relative bg-zinc-900 border border-zinc-800 p-8 rounded-3xl h-full flex flex-col transition-all duration-300 group-hover:border-zinc-700">
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-8 ${
-                  id === 'trading' ? 'bg-emerald-500/10 text-emerald-400' : 
-                  id === 'banking' ? 'bg-blue-500/10 text-blue-400' : 
-                  'bg-orange-500/10 text-orange-400'
-                }`}>
-                  <Icon className="w-8 h-8" />
-                </div>
-
-                <h3 className="text-2xl font-bold text-white mb-3 group-hover:translate-x-1 transition-transform uppercase italic tracking-tighter">
-                  {domain.name}
-                </h3>
-                <p className="text-zinc-400 mb-8 flex-grow leading-relaxed text-sm">
-                  {domain.description}
-                </p>
-
-                <div className="space-y-3 mb-8">
-                  {domain.features.map(feature => (
-                    <div key={feature} className="flex items-center gap-2 text-xs text-zinc-500">
-                      <Zap className="w-3 h-3 text-zinc-700" />
-                      {feature}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between pt-6 border-t border-zinc-800">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors">
-                    ACCÉDER AU MODULE
-                  </span>
-                  <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-white group-hover:translate-x-1 transition-all" />
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-
       {/* Footer Info */}
-      <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-12 border-t border-zinc-800 pt-12">
-        <div className="flex gap-4">
-          <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0">
-            <Lock className="w-5 h-5 text-zinc-500" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 border-t border-zinc-800/30 pt-12">
+        <div className="flex gap-5">
+          <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 shadow-xl">
+            <Lock className="w-6 h-6 text-emerald-400" />
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-1 text-sm uppercase tracking-tight">Sécurité Structurelle</h4>
-            <p className="text-xs text-zinc-500">Protocoles de protection multi-couches pour chaque domaine d'intervention.</p>
+            <h4 className="text-white font-black mb-1 text-xs uppercase tracking-widest italic">Sécurité Structurelle</h4>
+            <p className="text-xs text-zinc-500 leading-relaxed">Protocoles de protection multi-couches pour chaque domaine d'intervention.</p>
           </div>
         </div>
-        <div className="flex gap-4">
-          <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0">
-            <BarChart3 className="w-5 h-5 text-zinc-500" />
+        <div className="flex gap-5">
+          <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 shadow-xl">
+            <BarChart3 className="w-6 h-6 text-blue-400" />
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-1 text-sm uppercase tracking-tight">Analyse Temps Réel</h4>
-            <p className="text-xs text-zinc-500">Surveillance continue des métriques de risque et de performance.</p>
+            <h4 className="text-white font-black mb-1 text-xs uppercase tracking-widest italic">Analyse Temps Réel</h4>
+            <p className="text-xs text-zinc-500 leading-relaxed">Surveillance continue des métriques de risque et de performance.</p>
           </div>
         </div>
-        <div className="flex gap-4">
-          <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0">
-            <Shield className="w-5 h-5 text-zinc-500" />
+        <div className="flex gap-5">
+          <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 shadow-xl">
+            <Shield className="w-6 h-6 text-purple-400" />
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-1 text-sm uppercase tracking-tight">Conformité ERC-8004</h4>
-            <p className="text-xs text-zinc-500">Standardisation de la gouvernance pour les agents autonomes.</p>
+            <h4 className="text-white font-black mb-1 text-xs uppercase tracking-widest italic">Conformité ERC-8004</h4>
+            <p className="text-xs text-zinc-500 leading-relaxed">Standardisation de la gouvernance pour les agents autonomes.</p>
           </div>
         </div>
       </div>

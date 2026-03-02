@@ -1,5 +1,6 @@
 import React from 'react';
 import { Trophy, TrendingUp, AlertTriangle, BarChart3, Medal, ArrowRight } from 'lucide-react';
+import { ModuleHeader } from '../components/ModuleHeader';
 
 export function Leaderboard({ onNext }: { onNext: () => void }) {
   const teams = [
@@ -12,10 +13,12 @@ export function Leaderboard({ onNext }: { onNext: () => void }) {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold tracking-tight text-white">Hackathon Leaderboard</h2>
-        <p className="text-zinc-400">Step 5: Transparent performance metrics published by LabLab.ai.</p>
-      </div>
+      <ModuleHeader 
+        moduleName="Trading" 
+        moduleIcon="📈" 
+        currentPage="Leaderboard" 
+        progress={100}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex items-center gap-4">

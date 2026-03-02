@@ -12,9 +12,8 @@ import {
   RefreshCw,
   Info
 } from 'lucide-react';
-import { calculateMetrics, makeDecision } from '../lib/banking/engine';
-import { generateJustification } from '../lib/banking/gemini';
 import { Transaction, BankingMetrics, OntologicalTests, BankingDecision } from '../types';
+import { ModuleHeader } from '../components/ModuleHeader';
 
 interface BankingModuleProps {
   setActiveTab: (tab: string) => void;
@@ -24,86 +23,93 @@ export function BankingModule({ setActiveTab }: BankingModuleProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [metrics, setMetrics] = useState<BankingMetrics | null>(null);
+  const [tests, setTests] = useState<OntologicalTests | null>(null);
   const [decision, setDecision] = useState<{ decision: BankingDecision; confidence: number } | null>(null);
   const [justification, setJustification] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Initial mock data
+  // Load scenarios from API
+  const loadScenarios = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/banking/scenarios');
+      const data = await response.json();
+      setTransactions(data.map((s: any) => ({
+        id: s.id,
+        amount: s.amount,
+        currency: s.currency,
+        recipient: s.recipient,
+        sender: s.sender,
+        type: s.type,
+        timestamp: Date.now()
+      })));
+    } catch (error) {
+      console.error('Failed to load banking scenarios:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const mockTxs: Transaction[] = [
-      { id: 'TX-9021', amount: 45000, currency: 'USD', recipient: 'Unknown Corp', sender: 'Main Vault', timestamp: Date.now() - 10000, type: 'TRANSFER' },
-      { id: 'TX-8842', amount: 1200, currency: 'EUR', recipient: 'Verified Supplier', sender: 'Operations', timestamp: Date.now() - 50000, type: 'PAYMENT' },
-      { id: 'TX-7731', amount: 850000, currency: 'USDC', recipient: 'Offshore Entity', sender: 'Treasury', timestamp: Date.now() - 120000, type: 'TRANSFER' },
-    ];
-    setTransactions(mockTxs);
+    loadScenarios();
   }, []);
 
   const analyzeTransaction = async (tx: Transaction) => {
     setSelectedTx(tx);
     setIsAnalyzing(true);
     setJustification('');
+    setMetrics(null);
+    setDecision(null);
+    setTests(null);
     
-    // 1. Calculate Metrics
-    const m = calculateMetrics(tx);
-    setMetrics(m);
+    try {
+      // 1. Process Transaction via API
+      const processRes = await fetch('/api/banking/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transaction: tx })
+      });
+      const { metrics: m, tests: t, decision: d } = await processRes.json();
+      
+      setMetrics(m);
+      setTests(t);
+      setDecision(d);
 
-    // 2. Run Ontological Tests (Mock)
-    const tests: OntologicalTests = {
-      identityVerified: tx.amount < 100000,
-      intentClear: tx.type !== 'WITHDRAWAL' || tx.amount < 50000,
-      sourceLegit: tx.sender === 'Main Vault' || tx.sender === 'Operations',
-      destinationSafe: tx.recipient !== 'Offshore Entity' && tx.recipient !== 'Unknown Corp',
-      velocityNormal: true,
-      patternMatch: tx.amount % 1000 !== 0, // Suspicious if too round
-      complianceCheck: true,
-      riskThreshold: tx.amount < 500000,
-      liquidityCheck: true,
-    };
-
-    // 3. Make Decision
-    const d = makeDecision(m, tests);
-    setDecision(d);
-
-    // 4. Generate Gemini Justification
-    const j = await generateJustification(d.decision, m);
-    setJustification(j);
-    
-    setIsAnalyzing(false);
+      // 2. Generate Gemini Justification via API
+      const geminiRes = await fetch('/api/banking/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision: d, metrics: m, transaction: tx })
+      });
+      const { justification: j } = await geminiRes.json();
+      setJustification(j);
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      setJustification('Error during analysis. Please check server logs.');
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   return (
     <div className="space-y-8 pb-20">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => setActiveTab('home')}
-            className="p-2 hover:bg-zinc-900 rounded-full transition-colors text-zinc-500 hover:text-white"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <div>
-            <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white flex items-center gap-3">
-              <Landmark className="w-8 h-8 text-blue-400" />
-              Bank Safety Lab
-            </h2>
-            <p className="text-zinc-500 text-sm">Robot décisionnel autonome pour la surveillance bancaire.</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-black uppercase tracking-widest text-blue-400">
-            Ontological Engine Active
-          </div>
-        </div>
-      </div>
+      <ModuleHeader 
+        moduleName="Banking" 
+        moduleIcon="🏦" 
+        currentPage="Decision Engine" 
+        progress={isAnalyzing ? 45 : decision ? 100 : 0}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left: Transaction List */}
         <div className="lg:col-span-4 space-y-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Flux Transactions</h3>
-            <RefreshCw className="w-4 h-4 text-zinc-700 cursor-pointer hover:text-zinc-500" />
+            <RefreshCw 
+              className={`w-4 h-4 text-zinc-700 cursor-pointer hover:text-zinc-500 ${isLoading ? 'animate-spin' : ''}`} 
+              onClick={loadScenarios}
+            />
           </div>
           <div className="space-y-3">
             {transactions.map((tx) => (
@@ -155,17 +161,20 @@ export function BankingModule({ setActiveTab }: BankingModuleProps) {
                 <div className={`p-6 rounded-3xl border-2 flex items-center justify-between ${
                   decision?.decision === 'AUTHORIZE' ? 'bg-emerald-500/10 border-emerald-500/50' :
                   decision?.decision === 'ANALYZE' ? 'bg-amber-500/10 border-amber-500/50' :
-                  'bg-red-500/10 border-red-500/50'
+                  decision?.decision === 'BLOCK' ? 'bg-red-500/10 border-red-500/50' :
+                  'bg-zinc-900 border-zinc-800'
                 }`}>
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
                       decision?.decision === 'AUTHORIZE' ? 'bg-emerald-500 text-black' :
                       decision?.decision === 'ANALYZE' ? 'bg-amber-500 text-black' :
-                      'bg-red-500 text-white'
+                      decision?.decision === 'BLOCK' ? 'bg-red-500 text-white' :
+                      'bg-zinc-800 text-zinc-500'
                     }`}>
                       {decision?.decision === 'AUTHORIZE' ? <CheckCircle2 /> :
                        decision?.decision === 'ANALYZE' ? <Activity /> :
-                       <AlertTriangle />}
+                       decision?.decision === 'BLOCK' ? <AlertTriangle /> :
+                       <RefreshCw className="animate-spin" />}
                     </div>
                     <div>
                       <div className="text-[10px] font-black uppercase tracking-widest opacity-60">Verdict Robot</div>
@@ -177,7 +186,7 @@ export function BankingModule({ setActiveTab }: BankingModuleProps) {
                   <div className="text-right">
                     <div className="text-[10px] font-black uppercase tracking-widest opacity-60">Confiance</div>
                     <div className="text-2xl font-black italic text-white">
-                      {decision?.confidence.toFixed(1)}%
+                      {decision?.confidence.toFixed(1) || '0.0'}%
                     </div>
                   </div>
                 </div>
@@ -192,7 +201,7 @@ export function BankingModule({ setActiveTab }: BankingModuleProps) {
                   ].map((m) => (
                     <div key={m.label} className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl">
                       <div className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-2">{m.label}</div>
-                      <div className={`text-xl font-black ${m.color}`}>{m.value?.toFixed(3)}</div>
+                      <div className={`text-xl font-black ${m.color}`}>{m.value !== undefined ? m.value.toFixed(3) : '---'}</div>
                     </div>
                   ))}
                 </div>
@@ -206,7 +215,7 @@ export function BankingModule({ setActiveTab }: BankingModuleProps) {
                     <BrainCircuit className="w-4 h-4 text-blue-400" />
                     Justification IA (Gemini)
                   </h4>
-                  {isAnalyzing ? (
+                  {isAnalyzing && !justification ? (
                     <div className="space-y-3">
                       <div className="h-4 bg-zinc-800 rounded animate-pulse w-full" />
                       <div className="h-4 bg-zinc-800 rounded animate-pulse w-5/6" />
@@ -234,18 +243,7 @@ export function BankingModule({ setActiveTab }: BankingModuleProps) {
                       { name: 'Seuil de Risque', key: 'riskThreshold' },
                       { name: 'Vérification Liquidité', key: 'liquidityCheck' }
                     ].map((test) => {
-                      // We need to re-run the logic or store the results. 
-                      // For now, let's just use the logic from analyzeTransaction
-                      const isPassed = 
-                        test.key === 'identityVerified' ? selectedTx.amount < 100000 :
-                        test.key === 'intentClear' ? (selectedTx.type !== 'WITHDRAWAL' || selectedTx.amount < 50000) :
-                        test.key === 'sourceLegit' ? (selectedTx.sender === 'Main Vault' || selectedTx.sender === 'Operations') :
-                        test.key === 'destinationSafe' ? (selectedTx.recipient !== 'Offshore Entity' && selectedTx.recipient !== 'Unknown Corp') :
-                        test.key === 'velocityNormal' ? true :
-                        test.key === 'patternMatch' ? (selectedTx.amount % 1000 !== 0) :
-                        test.key === 'complianceCheck' ? true :
-                        test.key === 'riskThreshold' ? (selectedTx.amount < 500000) :
-                        true;
+                      const isPassed = tests ? tests[test.key as keyof OntologicalTests] : false;
 
                       return (
                         <div key={test.key} className="flex items-center gap-3">

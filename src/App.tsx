@@ -11,7 +11,8 @@ import { CapitalVault } from './pages/CapitalVault';
 import { RiskRouter } from './pages/RiskRouter';
 import { TrustSignals } from './pages/TrustSignals';
 import { Leaderboard } from './pages/Leaderboard';
-import { Menu, LayoutDashboard } from 'lucide-react';
+import { TradingTests } from './pages/TradingTests';
+import { GlobalHeader } from './components/GlobalHeader';
 import { motion, AnimatePresence } from 'motion/react';
 import { Terminal } from './components/Terminal';
 import { qualitativeLevel } from './lib/core/humanAlgebra';
@@ -177,6 +178,12 @@ export default function App() {
     }
   };
 
+  const getActiveDomain = () => {
+    if (['dashboard', 'step1', 'step2', 'step3', 'step4', 'step5', 'os4', 'trading_tests'].includes(activeTab)) return 'trading';
+    if (activeTab === 'banking') return 'banking';
+    if (activeTab === 'ecommerce') return 'ecommerce';
+    return undefined;
+  };
 
   const renderContent = () => {
     const props = { 
@@ -215,6 +222,7 @@ export default function App() {
               case 'step3': return <RiskRouter onNext={() => setActiveTab('step4')} scenarioId={selectedScenario} mode={mode} />;
               case 'step4': return <TrustSignals onNext={() => setActiveTab('step5')} />;
               case 'step5': return <Leaderboard onNext={() => setActiveTab('dashboard')} />;
+              case 'trading_tests': return <TradingTests />;
               case 'os4': return <OS4Reports {...props} />;
               default: return <Dashboard setActiveTab={setActiveTab} />;
             }
@@ -224,104 +232,52 @@ export default function App() {
     );
   };
 
+  const showSidebar = activeTab !== 'home';
+
   return (
-    <div className="flex h-screen bg-black text-zinc-100 font-sans overflow-hidden">
-      <Sidebar 
-        isOpen={isSidebarOpen} 
-        setIsOpen={setIsSidebarOpen} 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        mode={mode}
-        setMode={setMode}
-        selectedScenario={selectedScenario}
-        setSelectedScenario={setSelectedScenario}
-        isTerminalOpen={isTerminalOpen}
-        onToggleTerminal={() => setIsTerminalOpen(!isTerminalOpen)}
-      />
+    <div className="flex flex-col h-screen bg-black text-zinc-100 font-sans overflow-hidden">
+      <GlobalHeader activeDomain={getActiveDomain()} setActiveTab={setActiveTab} />
       
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        {/* Mobile Header */}
-        <div className="lg:hidden flex items-center justify-between p-4 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-md z-30">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-              <span className="text-emerald-400 font-bold text-sm">O</span>
-            </div>
-            <span className="font-bold text-white tracking-tight">Obsidia</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setActiveTab('dashboard')}
-              className="p-2 bg-zinc-900 rounded-lg border border-zinc-800 text-zinc-400 hover:text-white"
-            >
-              <LayoutDashboard className="w-5 h-5" />
-            </button>
-            <button 
-              onClick={() => setIsSidebarOpen(true)}
-              className="p-2 bg-zinc-900 rounded-lg border border-zinc-800 text-zinc-400 hover:text-white"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Desktop Header (Optional, for better circulation) */}
-        <div className="hidden lg:flex items-center justify-between px-12 py-4 border-b border-zinc-800/30 bg-black/50 backdrop-blur-sm z-20">
-          <div className="flex items-center gap-6">
-            <button 
-              onClick={() => setActiveTab('home')}
-              className={cn(
-                "flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-colors",
-                activeTab === 'home' ? "text-emerald-400" : "text-zinc-500 hover:text-white"
+      <div className="flex flex-1 overflow-hidden relative">
+        {showSidebar && (
+          <Sidebar 
+            isOpen={isSidebarOpen} 
+            setIsOpen={setIsSidebarOpen} 
+            activeTab={activeTab} 
+            setActiveTab={setActiveTab} 
+            mode={mode}
+            setMode={setMode}
+            selectedScenario={selectedScenario}
+            setSelectedScenario={setSelectedScenario}
+            isTerminalOpen={isTerminalOpen}
+            onToggleTerminal={() => setIsTerminalOpen(!isTerminalOpen)}
+          />
+        )}
+        
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+          <main className={cn(
+            "flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 transition-all duration-300",
+            isTerminalOpen ? (isTerminalMaximized ? "pb-[90vh]" : "pb-[400px]") : "pb-12"
+          )}>
+            <div className="max-w-6xl mx-auto">
+              {activeTab !== 'home' && activeTab !== 'banking' && activeTab !== 'ecommerce' && (
+                <WorkflowProgress activeTab={activeTab} setActiveTab={setActiveTab} />
               )}
-            >
-              <LayoutDashboard className="w-4 h-4" />
-              Home
-            </button>
-            <div className="w-px h-4 bg-zinc-800" />
-            <button 
-              onClick={() => setActiveTab('dashboard')}
-              className={cn(
-                "flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-colors",
-                activeTab === 'dashboard' ? "text-emerald-400" : "text-zinc-500 hover:text-white"
-              )}
-            >
-              Trading
-            </button>
-            <div className="w-px h-4 bg-zinc-800" />
-            <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-600">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              AKATON_HACKATHON_V1.0
+              {renderContent()}
             </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[9px] font-mono text-zinc-500">
-              0x742d...44e
-            </div>
-          </div>
+          </main>
+
+          <Terminal 
+            isOpen={isTerminalOpen} 
+            onClose={() => setIsTerminalOpen(false)}
+            isMaximized={isTerminalMaximized}
+            onToggleMaximize={() => setIsTerminalMaximized(!isTerminalMaximized)}
+            onRunTest={runTest}
+            onAddLog={(msg) => addLog(msg, msg.startsWith('$'))}
+            logs={logs}
+            testStatus={testStatus}
+          />
         </div>
-
-        <main className={cn(
-          "flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 transition-all duration-300",
-          isTerminalOpen ? (isTerminalMaximized ? "pb-[90vh]" : "pb-[400px]") : "pb-12"
-        )}>
-          <div className="max-w-6xl mx-auto">
-            {activeTab !== 'home' && activeTab !== 'banking' && activeTab !== 'ecommerce' && (
-              <WorkflowProgress activeTab={activeTab} setActiveTab={setActiveTab} />
-            )}
-            {renderContent()}
-          </div>
-        </main>
-
-        <Terminal 
-          isOpen={isTerminalOpen} 
-          onClose={() => setIsTerminalOpen(false)}
-          isMaximized={isTerminalMaximized}
-          onToggleMaximize={() => setIsTerminalMaximized(!isTerminalMaximized)}
-          onRunTest={runTest}
-          onAddLog={(msg) => addLog(msg, msg.startsWith('$'))}
-          logs={logs}
-          testStatus={testStatus}
-        />
       </div>
     </div>
   );

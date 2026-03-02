@@ -1,5 +1,5 @@
 // lib/simulation/simLite.ts
-import { MarketData } from '../features/volatility';
+import { MarketData, computeVolatility } from '../features/volatility';
 
 export interface SimulationResult {
   maxDrawdown: number;
@@ -17,28 +17,42 @@ export interface TradeIntent {
 export async function runSimulation(
   intent: TradeIntent,
   marketData: MarketData[],
-  numPaths = 100
+  numPaths = 1000
 ): Promise<SimulationResult> {
-  // Simulation Monte Carlo simplifiée pour le hackathon
+  // Real Monte Carlo based on market data
+  const volatility = computeVolatility(marketData);
+  const returns = marketData.slice(1).map((d, i) => (d.close - marketData[i].close) / marketData[i].close);
+  const drift = returns.reduce((a, b) => a + b, 0) / returns.length;
+  
   const paths: number[][] = [];
   let ruinCount = 0;
   let totalReturn = 0;
   let maxDD = 0;
 
+  const initialCapital = 10000;
+  const horizon = 30; // 30 days
+  const dt = 1 / 252; // daily step
+
   for (let i = 0; i < numPaths; i++) {
-    const path: number[] = [10000]; // Capital initial
-    let currentCapital = 10000;
+    const path: number[] = [initialCapital];
+    let currentCapital = initialCapital;
     
-    for (let t = 0; t < 30; t++) { // Simulation sur 30 jours
-      const dailyReturn = (Math.random() - 0.48) * 0.05; // Biais légèrement positif
+    for (let t = 0; t < horizon; t++) {
+      // Geometric Brownian Motion
+      const epsilon = Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
+      const dailyReturn = (drift - 0.5 * Math.pow(volatility, 2)) * dt + volatility * Math.sqrt(dt) * epsilon;
+      
       currentCapital *= (1 + dailyReturn);
       path.push(currentCapital);
       
-      if (currentCapital < 5000) ruinCount++; // Seuil de ruine à 50%
+      if (currentCapital < initialCapital * 0.5) {
+        ruinCount++;
+        break; // Stop path if ruined
+      }
     }
     
     paths.push(path);
-    totalReturn += (currentCapital - 10000) / 10000;
+    totalReturn += (currentCapital - initialCapital) / initialCapital;
     
     const peak = Math.max(...path);
     const dd = (peak - currentCapital) / peak;
@@ -47,8 +61,8 @@ export async function runSimulation(
 
   return {
     maxDrawdown: maxDD,
-    ruinProbability: ruinCount / (numPaths * 30),
+    ruinProbability: ruinCount / numPaths,
     expectedReturn: totalReturn / numPaths,
-    paths: paths.slice(0, 5) // On ne renvoie que quelques chemins pour l'UI
+    paths: paths.slice(0, 5) // Return 5 paths for visualization
   };
 }

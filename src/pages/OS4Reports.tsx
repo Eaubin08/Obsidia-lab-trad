@@ -1,6 +1,7 @@
 import React from 'react';
 import { Download, FileText, RotateCcw, Play } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { ModuleHeader } from '../components/ModuleHeader';
 
 interface OS4Props {
   mode: 'FIX' | 'AUTO';
@@ -70,6 +71,13 @@ export function OS4Reports({
 
   return (
     <div className="space-y-10">
+      <ModuleHeader 
+        moduleName="Trading" 
+        moduleIcon="📈" 
+        currentPage="AI Audit Reports" 
+        progress={testStatus === 'COMPLETED' ? 100 : testStatus === 'RUNNING' ? 50 : 0}
+      />
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div className="flex items-center gap-2 text-zinc-500 font-mono text-[10px] tracking-[0.3em] uppercase mb-2">

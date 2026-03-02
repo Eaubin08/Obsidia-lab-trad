@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { UserPlus, Shield, Fingerprint, Database, CheckCircle2, ArrowRight } from 'lucide-react';
+import { ModuleHeader } from '../components/ModuleHeader';
 
 export function AgentRegistry({ onNext }: { onNext: () => void }) {
   const [isRegistered, setIsRegistered] = useState(false);
@@ -22,10 +23,12 @@ export function AgentRegistry({ onNext }: { onNext: () => void }) {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold tracking-tight text-white">Agent Registry</h2>
-        <p className="text-zinc-400">Step 1: Mint and register your Agent Identity (ERC-721).</p>
-      </div>
+      <ModuleHeader 
+        moduleName="Trading" 
+        moduleIcon="📈" 
+        currentPage="Agent Registry" 
+        progress={35}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">

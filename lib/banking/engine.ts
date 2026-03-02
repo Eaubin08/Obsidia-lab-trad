@@ -1,26 +1,52 @@
-import { Transaction, BankingMetrics, OntologicalTests, BankingDecision } from '../../types';
+// lib/banking/engine.ts
+export interface Transaction {
+  id: string;
+  amount: number;
+  currency: string;
+  sender: string;
+  recipient: string;
+  timestamp: number;
+  type: 'TRANSFER' | 'PAYMENT' | 'WITHDRAWAL';
+}
+
+export interface BankingMetrics {
+  IR: number;
+  CIZ: number;
+  DTS: number;
+  TSG: number;
+}
+
+export interface OntologicalTests {
+  identityVerified: boolean;
+  intentClear: boolean;
+  sourceLegit: boolean;
+  destinationSafe: boolean;
+  velocityNormal: boolean;
+  patternMatch: boolean;
+  complianceCheck: boolean;
+  riskThreshold: boolean;
+  liquidityCheck: boolean;
+}
+
+export type BankingDecision = 'AUTHORIZE' | 'ANALYZE' | 'BLOCK';
 
 export function calculateIrreversibility(tx: Transaction): number {
-  // Higher for larger amounts and specific types like TRANSFER
   const base = tx.amount > 50000 ? 0.6 : 0.2;
   const typeMod = tx.type === 'TRANSFER' ? 0.3 : 0.1;
   return Math.min(base + typeMod, 1.0);
 }
 
 export function calculateConflictZone(tx: Transaction): number {
-  // Higher if recipient is unknown or offshore
   const isSuspicious = tx.recipient.toLowerCase().includes('unknown') || 
                       tx.recipient.toLowerCase().includes('offshore');
   return isSuspicious ? 0.85 : 0.15;
 }
 
 export function calculateTimeSensitivity(tx: Transaction): number {
-  // Higher for rapid successions or large amounts
   return tx.amount > 100000 ? 0.75 : 0.25;
 }
 
 export function calculateTotalGuard(tx: Transaction): number {
-  // Global risk score
   const ir = calculateIrreversibility(tx);
   const ciz = calculateConflictZone(tx);
   const dts = calculateTimeSensitivity(tx);
@@ -42,8 +68,8 @@ export function runOntologicalTests(tx: Transaction, metrics: BankingMetrics): O
     intentClear: tx.amount < 500000,
     sourceLegit: tx.sender.toLowerCase().includes('vault') || tx.sender.toLowerCase().includes('ops'),
     destinationSafe: !tx.recipient.toLowerCase().includes('offshore'),
-    velocityNormal: true, // Simplified for now
-    patternMatch: tx.amount % 1000 !== 0, // Round numbers are suspicious
+    velocityNormal: true,
+    patternMatch: tx.amount % 1000 !== 0,
     complianceCheck: true,
     riskThreshold: metrics.TSG < 0.7,
     liquidityCheck: true,

@@ -11,10 +11,12 @@ import {
   History,
   Lock,
   Unlock,
-  ExternalLink
+  ExternalLink,
+  RefreshCw,
+  Play
 } from 'lucide-react';
-import { evaluateAction, calculateFees } from '../lib/ecommerce/safetyGate';
 import { AgentAction, SafetyGateResult, TokenomicsModel } from '../types';
+import { ModuleHeader } from '../components/ModuleHeader';
 
 interface EcommerceModuleProps {
   setActiveTab: (tab: string) => void;
@@ -22,8 +24,11 @@ interface EcommerceModuleProps {
 
 export function EcommerceModule({ setActiveTab }: EcommerceModuleProps) {
   const [actions, setActions] = useState<AgentAction[]>([]);
+  const [scenarios, setScenarios] = useState<any[]>([]);
   const [lastAction, setLastAction] = useState<AgentAction | null>(null);
   const [currentResult, setCurrentResult] = useState<SafetyGateResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
   const [tokenomics, setTokenomics] = useState({
     totalFee: 0,
     stakerReward: 0,
@@ -38,101 +43,134 @@ export function EcommerceModule({ setActiveTab }: EcommerceModuleProps) {
     buyback_share: 0.2
   };
 
-  const triggerAction = (type: 'PURCHASE' | 'BID' | 'LIST') => {
+  // Load scenarios from API
+  const loadScenarios = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/ecommerce/scenarios');
+      const data = await response.json();
+      setScenarios(data);
+    } catch (error) {
+      console.error('Failed to load ecommerce scenarios:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadScenarios();
+  }, []);
+
+  const triggerAction = async (type: 'PURCHASE' | 'BID' | 'LIST', amount?: number, coherence?: number) => {
+    setIsEvaluating(true);
     const newAction: AgentAction = {
       id: `ACT-${Math.floor(Math.random() * 10000)}`,
-      agent_id: 'AGENT-X108',
+      agent_id: 'AGENT-X108-01',
       type,
-      amount: Math.floor(Math.random() * 5000) + 100,
+      amount: amount || Math.floor(Math.random() * 5000) + 100,
       recipient: 'Marketplace V3',
       timestamp: Date.now(),
-      coherence: Math.random() * 0.4 + 0.6 // 0.6 to 1.0
+      coherence: coherence || Math.random() * 0.4 + 0.6 // 0.6 to 1.0
     };
 
-    const result = evaluateAction(newAction, lastAction);
-    setCurrentResult(result);
-
-    if (result.decision === 'ALLOW') {
-      setLastAction(newAction);
-      setActions(prev => [newAction, ...prev].slice(0, 5));
-      
-      const fees = calculateFees(newAction.amount, model);
-      setTokenomics(prev => ({
-        totalFee: prev.totalFee + fees.totalFee,
-        stakerReward: prev.stakerReward + fees.stakerReward,
-        treasuryAmount: prev.treasuryAmount + fees.treasuryAmount,
-        buybackAmount: prev.buybackAmount + fees.buybackAmount
-      }));
-
-      // Simulate Moltbook Publication
-      console.log('Publishing to Moltbook...', {
-        timestamp: new Date().toISOString(),
-        decision: result.decision,
-        coherence: result.coherence,
-        temporal_delta: result.temporal_delta,
-        amount: newAction.amount,
-        recipient: newAction.recipient,
-        agent_id: newAction.agent_id
+    try {
+      const response = await fetch('/api/ecommerce/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: newAction, previousAction: lastAction, model })
       });
+      const { result, fees } = await response.json();
+      
+      setCurrentResult(result);
+
+      if (result.decision === 'ALLOW') {
+        setLastAction(newAction);
+        setActions(prev => [newAction, ...prev].slice(0, 5));
+        
+        if (fees) {
+          setTokenomics(prev => ({
+            totalFee: prev.totalFee + fees.totalFee,
+            stakerReward: prev.stakerReward + fees.stakerReward,
+            treasuryAmount: prev.treasuryAmount + fees.treasuryAmount,
+            buybackAmount: prev.buybackAmount + fees.buybackAmount
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Evaluation failed:', error);
+    } finally {
+      setIsEvaluating(false);
     }
+  };
+
+  const runScenario = (scenario: any) => {
+    triggerAction(scenario.type, scenario.amount, scenario.coherence);
   };
 
   return (
     <div className="space-y-8 pb-20">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => setActiveTab('home')}
-            className="p-2 hover:bg-zinc-900 rounded-full transition-colors text-zinc-500 hover:text-white"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <div>
-            <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white flex items-center gap-3">
-              <ShoppingCart className="w-8 h-8 text-orange-400" />
-              X-108 Safety Gate
-            </h2>
-            <p className="text-zinc-500 text-sm">Sécurité structurelle et verrouillage temporel pour l'e-commerce agentique.</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-[10px] font-black uppercase tracking-widest text-orange-400">
-            Temporal Lock Active (10s)
-          </div>
-        </div>
-      </div>
+      <ModuleHeader 
+        moduleName="E-commerce" 
+        moduleIcon="🛒" 
+        currentPage="Safety Gate" 
+        progress={actions.length * 20}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left: Control Panel */}
         <div className="lg:col-span-5 space-y-6">
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
-            <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-6 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-orange-400" />
-              Simulateur d'Action Agent
+            <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-orange-400" />
+                Simulateur d'Action Agent
+              </div>
+              <RefreshCw 
+                className={`w-4 h-4 text-zinc-700 cursor-pointer hover:text-zinc-500 ${isLoading ? 'animate-spin' : ''}`} 
+                onClick={loadScenarios}
+              />
             </h3>
-            <div className="grid grid-cols-1 gap-3">
-              <button 
-                onClick={() => triggerAction('PURCHASE')}
-                className="w-full py-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold flex items-center justify-between px-6 transition-all"
-              >
-                <span>Achat Direct</span>
-                <ShoppingCart className="w-5 h-5 opacity-50" />
-              </button>
-              <button 
-                onClick={() => triggerAction('BID')}
-                className="w-full py-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold flex items-center justify-between px-6 transition-all"
-              >
-                <span>Placer une Enchère</span>
-                <Activity className="w-5 h-5 opacity-50" />
-              </button>
-              <button 
-                onClick={() => triggerAction('LIST')}
-                className="w-full py-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold flex items-center justify-between px-6 transition-all"
-              >
-                <span>Mettre en Vente</span>
-                <Coins className="w-5 h-5 opacity-50" />
-              </button>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 gap-3">
+                <button 
+                  onClick={() => triggerAction('PURCHASE')}
+                  disabled={isEvaluating}
+                  className="w-full py-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold flex items-center justify-between px-6 transition-all disabled:opacity-50"
+                >
+                  <span>Achat Direct</span>
+                  <ShoppingCart className="w-5 h-5 opacity-50" />
+                </button>
+                <button 
+                  onClick={() => triggerAction('BID')}
+                  disabled={isEvaluating}
+                  className="w-full py-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold flex items-center justify-between px-6 transition-all disabled:opacity-50"
+                >
+                  <span>Placer une Enchère</span>
+                  <Activity className="w-5 h-5 opacity-50" />
+                </button>
+              </div>
+
+              {/* Scenarios Section */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Scénarios de Test</h4>
+                <div className="grid grid-cols-1 gap-2">
+                  {scenarios.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => runScenario(s)}
+                      disabled={isEvaluating}
+                      className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-orange-500/50 transition-all group"
+                    >
+                      <div className="text-left">
+                        <div className="text-xs font-bold text-zinc-300 group-hover:text-orange-400">{s.name}</div>
+                        <div className="text-[10px] text-zinc-600 uppercase tracking-wider">{s.type} — {s.amount} $X108</div>
+                      </div>
+                      <Play className="w-3 h-3 text-zinc-700 group-hover:text-orange-400" />
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
             
             <div className="mt-8 p-4 bg-zinc-950 rounded-2xl border border-zinc-800/50">
