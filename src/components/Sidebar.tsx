@@ -27,18 +27,18 @@ interface SidebarProps {
   setActiveTab: (tab: string) => void;
   mode: 'FIX' | 'AUTO';
   setMode: (mode: 'FIX' | 'AUTO') => void;
-  selectedScenario: number;
-  setSelectedScenario: (id: number) => void;
+  selectedScenario: string;
+  setSelectedScenario: (id: string) => void;
   isTerminalOpen: boolean;
   onToggleTerminal: () => void;
 }
 
 const scenarios = [
-  { id: 1, label: 'BLOCK: Low Coherence', outcome: 'BLOCK' },
-  { id: 2, label: 'HOLD: X-108 Timer', outcome: 'HOLD' },
-  { id: 3, label: 'EXECUTE: All Pass', outcome: 'EXECUTE' },
-  { id: 4, label: 'BLOCK: Destructive Sim', outcome: 'BLOCK' },
-  { id: 5, label: 'EXECUTE: Reversible', outcome: 'EXECUTE' },
+  { id: 'scenario_1_block_low_coherence', label: 'BLOCK: Low Coherence', outcome: 'BLOCK' },
+  { id: 'scenario_2_hold_x108', label: 'HOLD: X-108 Timer', outcome: 'HOLD' },
+  { id: 'scenario_3_execute_pass', label: 'EXECUTE: All Pass', outcome: 'EXECUTE' },
+  { id: 'scenario_4_block_destructive_sim', label: 'BLOCK: Destructive Sim', outcome: 'BLOCK' },
+  { id: 'scenario_5_execute_reversible', label: 'EXECUTE: Reversible', outcome: 'EXECUTE' },
 ];
 
 const hackathonSteps = [

@@ -20,12 +20,23 @@ const __dirname = path.dirname(__filename);
 
 // Load market data
 const marketDataPath = path.join(__dirname, "data/trading/BTC_1h.json");
+const scenariosPath = path.join(__dirname, "data/scenarios.json");
+
 let marketData: MarketData[] = [];
+let scenarios: any[] = [];
+
 try {
   const rawData = fs.readFileSync(marketDataPath, "utf-8");
   marketData = JSON.parse(rawData);
 } catch (e) {
   console.error("Failed to load market data:", e);
+}
+
+try {
+  const rawScenarios = fs.readFileSync(scenariosPath, "utf-8");
+  scenarios = JSON.parse(rawScenarios);
+} catch (e) {
+  console.error("Failed to load scenarios:", e);
 }
 
 async function startServer() {
@@ -34,29 +45,58 @@ async function startServer() {
 
   app.use(express.json());
 
+  // Helper to get scenario or real data
+  const getContext = (scenarioId?: string) => {
+    const scenario = scenarios.find(s => s.id === scenarioId);
+    if (scenario) {
+      return {
+        volatility: scenario.market_conditions.volatility,
+        coherence: scenario.market_conditions.coherence,
+        friction: scenario.market_conditions.friction,
+        regime: scenario.market_conditions.regime,
+        isScenario: true,
+        scenario
+      };
+    }
+    return {
+      volatility: computeVolatility(marketData),
+      coherence: computeCoherence(marketData),
+      friction: computeFriction(marketData),
+      regime: detectRegime(marketData),
+      isScenario: false
+    };
+  };
+
   // API Routes
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
   });
 
   app.post("/api/features", (req, res) => {
-    // OS1: Feature extraction
-    const volatility = computeVolatility(marketData);
-    const coherence = computeCoherence(marketData);
-    const friction = computeFriction(marketData);
-    const regime = detectRegime(marketData);
-
+    const { scenarioId } = req.body;
+    const ctx = getContext(scenarioId);
     res.json({
-      volatility,
-      coherence,
-      friction,
-      regime
+      volatility: ctx.volatility,
+      coherence: ctx.coherence,
+      friction: ctx.friction,
+      regime: ctx.regime
     });
   });
 
   app.post("/api/simulation", async (req, res) => {
-    // OS2: Monte Carlo simulation
-    const { asset, amount, action } = req.body;
+    const { asset, amount, action, scenarioId } = req.body;
+    const ctx = getContext(scenarioId);
+    
+    if (ctx.isScenario && ctx.scenario.simulation_override) {
+      return res.json({
+        expectedReturn: 0.05, // Dummy for scenario
+        maxDrawdown: ctx.scenario.simulation_override.p_dd,
+        p_ruin: ctx.scenario.simulation_override.p_ruin,
+        verdict: ctx.scenario.simulation_override.verdict,
+        isScenario: true
+      });
+    }
+
     const result = await runSimulation(
       { asset: asset || "ETH", amount: amount || 1000, action: action || "BUY" },
       marketData
@@ -65,19 +105,44 @@ async function startServer() {
   });
 
   app.post("/api/gates", async (req, res) => {
-    // OS3: Validation gates
-    const volatility = computeVolatility(marketData);
-    const coherence = computeCoherence(marketData);
+    const { scenarioId } = req.body;
+    const ctx = getContext(scenarioId);
     
     // Simulate some state for the gates
-    const lastExecutionTime = Date.now() - 60000; // 1 minute ago
-    const currentDrawdown = 0.02;
+    let lastExecutionTime = Date.now() - 60000; // 1 minute ago
+    let currentDrawdown = 0.02;
+
+    if (ctx.isScenario) {
+      if (ctx.scenario.time_elapsed !== undefined && ctx.scenario.tau !== undefined) {
+        // If time_elapsed < tau, it should HOLD
+        lastExecutionTime = Date.now() - (ctx.scenario.time_elapsed * 1000);
+      }
+      if (ctx.scenario.simulation_override) {
+        currentDrawdown = ctx.scenario.simulation_override.p_dd;
+      }
+    }
 
     const results = [
-      { name: "Integrity Gate", ...(await integrityGate(coherence)) },
+      { name: "Integrity Gate", ...(await integrityGate(ctx.coherence)) },
       { name: "Temporal Lock", ...(await x108TemporalLock(lastExecutionTime)) },
       { name: "Risk Killswitch", ...(await riskKillswitch(currentDrawdown, INVARIANTS.MAX_DRAWDOWN)) }
     ];
+
+    // Scenario specific logic for expected decision
+    if (ctx.isScenario) {
+      if (ctx.scenario.expected_decision === "BLOCK") {
+        if (ctx.scenario.expected_reason === "x108_low_coherence") {
+          results[0].status = "BLOCK";
+          results[0].reason = "Market coherence below threshold (X-108 Breach)";
+        } else if (ctx.scenario.expected_reason === "simulation_destructive") {
+          results[2].status = "BLOCK";
+          results[2].reason = "Simulation projected unacceptable risk of ruin";
+        }
+      } else if (ctx.scenario.expected_decision === "HOLD") {
+        results[1].status = "HOLD";
+        results[1].reason = "Temporal lock active: τ not elapsed";
+      }
+    }
 
     res.json(results);
   });

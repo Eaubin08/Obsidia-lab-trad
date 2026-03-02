@@ -11,6 +11,7 @@ import { Leaderboard } from './pages/Leaderboard';
 import { Menu, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Terminal } from './components/Terminal';
+import { qualitativeLevel } from './lib/core/humanAlgebra';
 import { cn } from './lib/utils';
 
 export default function App() {
@@ -18,7 +19,7 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [mode, setMode] = useState<'FIX' | 'AUTO'>(() => (localStorage.getItem('obsidia_mode') as 'FIX' | 'AUTO') || 'AUTO');
   const [testType, setTestType] = useState<'AUTONOMOUS' | 'FIXED'>('FIXED');
-  const [selectedScenario, setSelectedScenario] = useState(3);
+  const [selectedScenario, setSelectedScenario] = useState('scenario_3_execute_pass');
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [isTerminalMaximized, setIsTerminalMaximized] = useState(false);
   const [testStatus, setTestStatus] = useState<'IDLE' | 'RUNNING' | 'COMPLETED'>('IDLE');
@@ -66,14 +67,34 @@ export default function App() {
     try {
       // Fetch real data from API
       const [featuresRes, simulationRes, gatesRes] = await Promise.all([
-        fetch('/api/features', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) }),
-        fetch('/api/simulation', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ asset: 'ETH', amount: 2000, action: 'BUY' }) }),
-        fetch('/api/gates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+        fetch('/api/features', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ scenarioId: mode === 'FIX' ? selectedScenario : undefined }) 
+        }),
+        fetch('/api/simulation', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ 
+            asset: 'ETH', 
+            amount: 2000, 
+            action: 'BUY',
+            scenarioId: mode === 'FIX' ? selectedScenario : undefined 
+          }) 
+        }),
+        fetch('/api/gates', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ scenarioId: mode === 'FIX' ? selectedScenario : undefined }) 
+        })
       ]);
 
       const features = await featuresRes.json();
       const simulation = await simulationRes.json();
       const gates = await gatesRes.json();
+
+      const stabilitySym = qualitativeLevel(1.0 - features.volatility);
+      const coherenceSym = qualitativeLevel(features.coherence);
 
       // Start the visual sequence
       const steps = [
@@ -81,7 +102,7 @@ export default function App() {
           gate: 0, 
           confidence: 32,
           logs: [
-            `  [DATA] Volatility: ${(features.volatility * 100).toFixed(2)}% | Coherence: ${(features.coherence * 100).toFixed(2)}%`,
+            `  [DATA] Volatility: ${(features.volatility * 100).toFixed(2)}% ${stabilitySym} | Coherence: ${(features.coherence * 100).toFixed(2)}% ${coherenceSym}`,
             `  ✓ ${gates[0].name} — ${gates[0].status}`,
             `  PASS  src/gates/akaton/Integrity.gate.ts`
           ]
@@ -185,7 +206,7 @@ export default function App() {
               case 'dashboard': return <Dashboard setActiveTab={setActiveTab} />;
               case 'step1': return <AgentRegistry onNext={() => setActiveTab('step2')} />;
               case 'step2': return <CapitalVault onNext={() => setActiveTab('step3')} />;
-              case 'step3': return <RiskRouter onNext={() => setActiveTab('step4')} />;
+              case 'step3': return <RiskRouter onNext={() => setActiveTab('step4')} scenarioId={selectedScenario} mode={mode} />;
               case 'step4': return <TrustSignals onNext={() => setActiveTab('step5')} />;
               case 'step5': return <Leaderboard onNext={() => setActiveTab('dashboard')} />;
               case 'os4': return <OS4Reports {...props} />;

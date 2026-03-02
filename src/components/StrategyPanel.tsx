@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { STRATEGY_CONFIG } from '../../config/strategy';
+import { STRATEGY_CONFIG } from '../config/strategy';
 
 export default function StrategyPanel() {
   return (

@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { computeVolatility } from '../../lib/features/volatility';
 
-export default function SignalsPanel() {
+export default function SignalsPanel({ scenarioId, mode }: { scenarioId?: string, mode?: 'FIX' | 'AUTO' }) {
   const [signals, setSignals] = useState<{
     volatility: number;
+    coherence: number;
     rsi: number;
     ma7: number;
     ma30: number;
@@ -13,11 +14,16 @@ export default function SignalsPanel() {
   } | null>(null);
 
   useEffect(() => {
-    fetch('/api/features', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+    fetch('/api/features', { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify({ scenarioId: mode === 'FIX' ? scenarioId : undefined }) 
+    })
       .then(res => res.json())
       .then(data => {
         setSignals({
           volatility: data.volatility,
+          coherence: data.coherence,
           rsi: 28.5, // Mock RSI as it's not in the API yet
           ma7: 62450,
           ma30: 61800,
@@ -25,7 +31,7 @@ export default function SignalsPanel() {
         });
       })
       .catch(err => console.error('Error fetching features:', err));
-  }, []);
+  }, [scenarioId, mode]);
 
   if (!signals) return <div className="animate-pulse text-gray-500">Extraction des signaux en cours...</div>;
 
@@ -56,6 +62,10 @@ export default function SignalsPanel() {
           <div className="bg-gray-800/50 p-2 rounded border border-white/10">
             <div className="text-[10px] text-gray-500 uppercase">Volatilité</div>
             <div className="text-sm font-mono text-white">{(signals.volatility * 100).toFixed(2)}%</div>
+          </div>
+          <div className="bg-gray-800/50 p-2 rounded border border-white/10">
+            <div className="text-[10px] text-gray-500 uppercase">Cohérence</div>
+            <div className="text-sm font-mono text-white">{(signals.coherence * 100).toFixed(2)}%</div>
           </div>
           <div className="bg-gray-800/50 p-2 rounded border border-white/10">
             <div className="text-[10px] text-gray-500 uppercase">RSI (14)</div>
