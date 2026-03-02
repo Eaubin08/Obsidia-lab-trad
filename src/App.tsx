@@ -3,6 +3,9 @@ import { Sidebar } from './components/Sidebar';
 import { OS4Reports } from './pages/OS4Reports';
 import { WorkflowProgress } from './components/WorkflowProgress';
 import { Dashboard } from './pages/Dashboard';
+import { HomeDashboard } from './pages/HomeDashboard';
+import { BankingPlaceholder } from './pages/BankingPlaceholder';
+import { EcommercePlaceholder } from './pages/EcommercePlaceholder';
 import { AgentRegistry } from './pages/AgentRegistry';
 import { CapitalVault } from './pages/CapitalVault';
 import { RiskRouter } from './pages/RiskRouter';
@@ -15,7 +18,7 @@ import { qualitativeLevel } from './lib/core/humanAlgebra';
 import { cn } from './lib/utils';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('obsidia_active_tab') || 'dashboard');
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('obsidia_active_tab') || 'home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [mode, setMode] = useState<'FIX' | 'AUTO'>(() => (localStorage.getItem('obsidia_mode') as 'FIX' | 'AUTO') || 'AUTO');
   const [testType, setTestType] = useState<'AUTONOMOUS' | 'FIXED'>('FIXED');
@@ -203,7 +206,10 @@ export default function App() {
         >
           {(() => {
             switch (activeTab) {
+              case 'home': return <HomeDashboard setActiveTab={setActiveTab} />;
               case 'dashboard': return <Dashboard setActiveTab={setActiveTab} />;
+              case 'banking': return <BankingPlaceholder setActiveTab={setActiveTab} />;
+              case 'ecommerce': return <EcommercePlaceholder setActiveTab={setActiveTab} />;
               case 'step1': return <AgentRegistry onNext={() => setActiveTab('step2')} />;
               case 'step2': return <CapitalVault onNext={() => setActiveTab('step3')} />;
               case 'step3': return <RiskRouter onNext={() => setActiveTab('step4')} scenarioId={selectedScenario} mode={mode} />;
@@ -262,14 +268,24 @@ export default function App() {
         <div className="hidden lg:flex items-center justify-between px-12 py-4 border-b border-zinc-800/30 bg-black/50 backdrop-blur-sm z-20">
           <div className="flex items-center gap-6">
             <button 
+              onClick={() => setActiveTab('home')}
+              className={cn(
+                "flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-colors",
+                activeTab === 'home' ? "text-emerald-400" : "text-zinc-500 hover:text-white"
+              )}
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              Home
+            </button>
+            <div className="w-px h-4 bg-zinc-800" />
+            <button 
               onClick={() => setActiveTab('dashboard')}
               className={cn(
                 "flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-colors",
                 activeTab === 'dashboard' ? "text-emerald-400" : "text-zinc-500 hover:text-white"
               )}
             >
-              <LayoutDashboard className="w-4 h-4" />
-              Dashboard
+              Trading
             </button>
             <div className="w-px h-4 bg-zinc-800" />
             <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-600">
@@ -289,7 +305,9 @@ export default function App() {
           isTerminalOpen ? (isTerminalMaximized ? "pb-[90vh]" : "pb-[400px]") : "pb-12"
         )}>
           <div className="max-w-6xl mx-auto">
-            <WorkflowProgress activeTab={activeTab} setActiveTab={setActiveTab} />
+            {activeTab !== 'home' && activeTab !== 'banking' && activeTab !== 'ecommerce' && (
+              <WorkflowProgress activeTab={activeTab} setActiveTab={setActiveTab} />
+            )}
             {renderContent()}
           </div>
         </main>
