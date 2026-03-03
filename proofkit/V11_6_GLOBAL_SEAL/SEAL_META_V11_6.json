@@ -1,0 +1,9 @@
+{
+  "freeze": "OBSIDIA_V11_6_STABLE_GLOBAL",
+  "timestamp": "2026-03-03T18:36:41.295948+00:00",
+  "commit": "6c38426e31e08f43b239b49fc738fcd71c08c77b",
+  "files_sealed": 514,
+  "manifest_hash": "c923f5b6390105668f6cbc08cc72cd6470daae01af12d95faf33a47c54f43198",
+  "root_hash_file_hash": "cd06fbd2f8cb798866a3f3482a29f7f10620eaa658ac5a1cf14d421b0e691873",
+  "global_seal_hash": "8865c84fb8b4d2b77141b85ea7799af607685ea2c231e2823a628e9005772ef5"
+}
