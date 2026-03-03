@@ -1,8 +1,8 @@
 {
-  "version": "V24",
-  "phase": "24-tla-plus",
-  "timestamp": "2026-03-03T22:17:21.015473Z",
-  "FILES_SEALED": 544,
+  "version": "V25",
+  "phase": "x108-std-v1.0",
+  "timestamp": "2026-03-03T22:22:39.632574Z",
+  "FILES_SEALED": 559,
   "SEAL_METHOD": "git-ls-files-only",
   "EXCLUDED_FROM_MANIFEST": [
     "MASTER_MANIFEST_V15.json",
@@ -11,14 +11,13 @@
   ],
   "ROOT_RULE": "sha256(concat(sorted(manifest_hashes_by_path)))",
   "GLOBAL_RULE": "sha256(manifest_hash + newline + root_hash_file_hash + newline)",
-  "ROOT_HASH": "af5480ec51383a56f5288355081f371fa91da3143b3ab176b9c31ef30487fd46",
-  "manifest_hash": "fd702ee0d0230bfbdbff4f774aa4520811b703ad1795111071a135493783b133",
-  "root_hash_file_hash": "0c26c8f6d48fe97848ebc3b7b4f1f5076983b47df53bf9b0b2d6bcebe0b7d1c5",
-  "GLOBAL_SEAL_HASH": "49f4d4e7de15bbea50cd76ea8109fbae796d61bc4916004edea68746f82af6aa",
-  "commit": "75e4e09374f25cfc626e683d20015bf7807c780d",
-  "tag": "v24-final",
-  "status": "PASS",
-  "lake_build": "Build completed successfully (10 jobs)",
-  "conformance": "PASS",
-  "trace_check": "ALL PASS 0/8000 violations"
+  "ROOT_HASH": "005a90a92598046e7b662e6d7e5d1e096e949d662cdb4b237ad59cd4d7db7362",
+  "manifest_hash": "eeb862b66485004ee7a4963dbef7b6cbf44f5a093101129d04de7e4e3eb1eac8",
+  "root_hash_file_hash": "0aa00c00abe4aad481b9289b68b9ea7eca7d95783b1e7d77381accfa5dd3ac80",
+  "GLOBAL_SEAL_HASH": "7b48add10ec6c115c0d270aeb73eece6c2887bc2d34c40c1c87a82540adb7a64",
+  "commit": "b0f541cf3dea5b6588c9588acf083c3dd16af816",
+  "tag": "x108-std-v1.0",
+  "verify_x108_standard": "ALL CHECKS PASS PASS=4 FAIL=0",
+  "vectors": "80/80 PASS",
+  "traces": "0/8000 violations"
 }
