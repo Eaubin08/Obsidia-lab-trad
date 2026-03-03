@@ -1,9 +1,33 @@
 {
-  "freeze": "OBSIDIA_V11_6_STABLE_GLOBAL",
-  "timestamp": "2026-03-03T18:36:41.295948+00:00",
-  "commit": "6c38426e31e08f43b239b49fc738fcd71c08c77b",
-  "files_sealed": 514,
-  "manifest_hash": "c923f5b6390105668f6cbc08cc72cd6470daae01af12d95faf33a47c54f43198",
-  "root_hash_file_hash": "cd06fbd2f8cb798866a3f3482a29f7f10620eaa658ac5a1cf14d421b0e691873",
-  "global_seal_hash": "8865c84fb8b4d2b77141b85ea7799af607685ea2c231e2823a628e9005772ef5"
+  "version": "V13-IMMUTABILITY-PROOF",
+  "timestamp": "2026-03-03T19:17:30.721733Z",
+  "files_sealed": 488,
+  "root_hash": "4e698d914ec164151f09d4205b8503d99dcfd2e2e2c76d8434589ba79751d2c8",
+  "manifest_hash": "ec33146767ca298c925ea226078e494247d344930a2d6fa01493c76adff13dbc",
+  "root_hash_file_hash": "ada91e88cfa697cb421329aa329c923fe9d33dd489b2700279d37b2b2b65f46e",
+  "global_seal_hash": "68e1e50a31ad85ac88c798c70cd520d94b6251023bc224b0f4a991f501facf72",
+  "lean_modules": [
+    "Obsidia.Basic",
+    "Obsidia.Consensus",
+    "Obsidia.Merkle",
+    "Obsidia.Seal"
+  ],
+  "lean_build": "Build completed successfully (6 jobs)",
+  "theorems": [
+    "D1_determinism",
+    "G1_act_above_threshold",
+    "E2_no_act_below_threshold",
+    "G2_boundary_inclusive",
+    "G3_monotonicity",
+    "L11_3_no_block",
+    "L11_3_act",
+    "L11_3_hold",
+    "aggregate4_act",
+    "aggregate4_hold",
+    "aggregate4_block_by_supermajority",
+    "aggregate4_fail_closed",
+    "merkle2_left_mutation",
+    "merkle2_right_mutation",
+    "P13_Immutability"
+  ]
 }
