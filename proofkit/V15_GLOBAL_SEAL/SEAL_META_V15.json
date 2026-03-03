@@ -1,17 +1,28 @@
 {
-  "version": "V15",
-  "phase": "15",
-  "timestamp": "2026-03-03T20:01:17.561105Z",
-  "file_count": 500,
-  "root_hash": "b013cfea68945a37f163bc580974666f950654c7262ba2621e933cb029172187",
-  "global_seal_hash": "a0b95a5d8fab12d70faf2ac89160b9610bc5bd39104ecbd82f5aedb6ad0cbb6a",
-  "seal_method": "git-ls-files-only",
-  "commit": "7887196ddb57cf6b0f987eae539493aaea3a7280",
-  "status": "PASS",
+  "version": "V15.1",
+  "phase": "15.1",
+  "timestamp": "2026-03-03T20:14:59.063991Z",
+  "FILES_SEALED": 500,
+  "SEAL_METHOD": "git-ls-files-only",
+  "EXCLUDED_FROM_MANIFEST": [
+    "MASTER_MANIFEST_V15.json",
+    "ROOT_HASH_V15.txt",
+    "SEAL_META_V15.json"
+  ],
+  "ROOT_RULE": "sha256(concat(sorted(manifest_hashes_by_path)))",
+  "GLOBAL_RULE": "sha256(manifest_hash + newline + root_hash_file_hash + newline)",
+  "ROOT_HASH": "b013cfea68945a37f163bc580974666f950654c7262ba2621e933cb029172187",
+  "manifest_hash": "4b2b91cdadde459324d4a9045ea1cdc333dc4c35d7e85f69dee280edd768d7b0",
+  "root_hash_file_hash": "e1a1249cd707118e239017759f915964775303c42b3cb2939986a9565a7bf302",
+  "GLOBAL_SEAL_HASH": "b99b11bbf6256bfebf89a08e3b7599db97a6ac2f8073907ce6ba6b84c97c54a2",
+  "commit": "3f35ec4720e2212c71d3fa624d6268327adf1533",
+  "tag": "v15.1-final",
   "lean_build": "Build completed successfully (7 jobs)",
   "new_theorems": [
     "merkleRoot_change_if_leaf_change",
     "globalSeal_change_if_root_change",
     "P15_Immutability_Strong"
-  ]
+  ],
+  "status": "PASS",
+  "verify_command": "python3 proofkit/V15_GLOBAL_SEAL/seal_verify.py"
 }
