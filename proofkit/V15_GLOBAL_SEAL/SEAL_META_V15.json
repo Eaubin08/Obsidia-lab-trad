@@ -1,8 +1,8 @@
 {
-  "version": "V16",
-  "phase": "16",
-  "timestamp": "2026-03-03T20:46:59.347158Z",
-  "FILES_SEALED": 517,
+  "version": "V17",
+  "phase": "17-18-19",
+  "timestamp": "2026-03-03T21:15:48.673922Z",
+  "FILES_SEALED": 522,
   "SEAL_METHOD": "git-ls-files-only",
   "EXCLUDED_FROM_MANIFEST": [
     "MASTER_MANIFEST_V15.json",
@@ -11,16 +11,11 @@
   ],
   "ROOT_RULE": "sha256(concat(sorted(manifest_hashes_by_path)))",
   "GLOBAL_RULE": "sha256(manifest_hash + newline + root_hash_file_hash + newline)",
-  "ROOT_HASH": "79d2c1585d06d719b79aad397b659ee9d22dd33f33424b1a9f759821ad01242b",
-  "manifest_hash": "4a60ea99118c112ec14ad3981e971f2b16f0ec11572d80814e73ade70780d426",
-  "root_hash_file_hash": "2b1262d4e58a3273b8fc9f0345966792ffc83b6b14e5c5c21a56bd5121b373a0",
-  "GLOBAL_SEAL_HASH": "477e1e366daa2697f004e66b0bf68ec45a7dc52ec3ccf336836404f8c40f0439",
-  "commit": "9b142fb803e2d27c346be05b777039fca0529363",
-  "tag": "v16-final",
-  "lean_build": "Build completed successfully (7 jobs)",
-  "adversarial_audit": "ALL TESTS PASSED \u2014 NO STRUCTURAL WEAKNESS DETECTED",
-  "threat_model": "PASS \u2014 8/8 claims verified (v16A-threat-model)",
-  "paper": "docs/paper/OBSIDIA_PAPER_v16.md",
-  "status": "PASS",
-  "verify_command": "python3 proofkit/V15_GLOBAL_SEAL/seal_verify.py"
+  "ROOT_HASH": "6ff15e770ce4d6a784a7fead59399f885bfa57990ce26c2a102338894a3a54dc",
+  "manifest_hash": "0abad1e6ad606dae9f4bb194ce81a2f72a58e10577810e8089bb2a7a461c2b5b",
+  "root_hash_file_hash": "3e4e3885b38073bc896d25bc7ddd4a7dc3718d64f6785e1ac90d32e33dc503d5",
+  "GLOBAL_SEAL_HASH": "531218310bd708b181e4fd53cc335a42615cc2caf7d6f86c0728e7075922d35c",
+  "commit": "330c99df49e2e6c0fea2c48c94678fbe867e78b1",
+  "tag": "v17-final",
+  "status": "PASS"
 }

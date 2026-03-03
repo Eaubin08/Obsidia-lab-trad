@@ -1,23 +1,23 @@
 {
   "version": "v16",
   "phase": "16A",
-  "timestamp": "2026-03-03T20:43:26.946899Z",
+  "timestamp": "2026-03-03T21:17:33.503658Z",
   "tag": "v15.2-final",
   "commit": "316a29a2ff91813b7ae019f6bee42350d0b6ae0e",
   "global_seal_hash": "1b23775be41377e0117e0cbe9a855c2d0cce22be3766b678b5ab8798ccd33c3c",
   "total_claims": 8,
-  "passed": 8,
-  "failed": 0,
-  "global_status": "PASS",
+  "passed": 7,
+  "failed": 1,
+  "global_status": "FAIL",
   "claims": [
     {
       "id": "TM-01",
       "claim": "Modification of a sealed file is detected by seal_verify.py.",
-      "status": "PASS",
+      "status": "FAIL",
       "artifact_check": "PASS",
-      "test_run": "PASS",
+      "test_run": "FAIL",
       "missing_artifacts": [],
-      "test_output": " file\n    (ghost files outside manifest are not detected by design \u2014 expected behavior)\n\n  Targets tested : 6\n  Detected       : 6\n  Undetected     : 0\n\nPASS \u2014 All 6 tampers detected by seal_verify.py"
+      "test_output": "y already fails before tamper: Verifying V15 GLOBAL SEAL...\nFAIL \u2014 Manifest integrity errors:\n   Hash mismatch: docs/security/THREAT_MODEL_REPORT_v16.json\n\nFAIL \u2014 Seal was not PASS before test started"
     },
     {
       "id": "TM-02",
