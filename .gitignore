@@ -9,3 +9,6 @@ coverage/
 core/api/audit_log.jsonl
 __pycache__/
 *.pyc
+core/api/security/nonce_store.json
+core/api/security/ed25519_private.key
+merkle_root.json

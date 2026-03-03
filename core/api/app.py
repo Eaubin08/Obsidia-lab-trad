@@ -6,7 +6,11 @@ import json, os, hashlib
 # Import real engine functions (pure)
 from core.engine.obsidia_os2.metrics import compute_metrics_core_fixed, decision_act_hold, Metrics
 
-APP = FastAPI(title="Obsidia API", version="0.1")
+# Phase 6 — Institutional lock
+from core.api.security.nonce import check_and_store_nonce
+from core.api.security.signature import sign_hash, get_public_key_hex
+
+APP = FastAPI(title="Obsidia API", version="0.2")
 
 AUDIT_PATH = os.path.join(os.path.dirname(__file__), "audit_log.jsonl")
 
@@ -21,7 +25,6 @@ def append_audit(entry: Dict[str, Any]) -> Dict[str, Any]:
     prev_hash = None
     if os.path.exists(AUDIT_PATH):
         with open(AUDIT_PATH, "rb") as f:
-            # read last non-empty line
             lines = f.read().splitlines()
             for line in reversed(lines):
                 if line.strip():
@@ -58,6 +61,9 @@ class DecisionRequest(BaseModel):
     # Decision threshold
     theta_S: float = 0.25
 
+    # Phase 6 — Nonce obligatoire (anti-replay)
+    nonce: str
+
     # Optional audit metadata
     request_id: Optional[str] = None
     client_time: Optional[str] = Field(default=None, description="ISO timestamp provided by client for deterministic logs")
@@ -71,6 +77,12 @@ class DecisionResponse(BaseModel):
 
 @APP.post("/v1/decision", response_model=DecisionResponse)
 def v1_decision(req: DecisionRequest):
+    # Phase 6 — Anti-replay: vérifier et stocker le nonce
+    try:
+        check_and_store_nonce(req.nonce)
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
     # Build metrics
     if req.metrics is not None:
         m = Metrics(req.metrics.T_mean, req.metrics.H_score, req.metrics.A_score, req.metrics.S)
@@ -84,12 +96,18 @@ def v1_decision(req: DecisionRequest):
     audit_entry = {
         "request_id": req.request_id,
         "client_time": req.client_time,
+        "nonce": req.nonce,
         "theta_S": req.theta_S,
         "decision": decision,
         "metrics": {"T_mean": m.T_mean, "H_score": m.H_score, "A_score": m.A_score, "S": m.S},
         "tags": req.tags or {},
     }
     audit = append_audit(audit_entry)
+
+    # Phase 6 — Signature ED25519 sur entry_hash
+    signature = sign_hash(audit["entry_hash"])
+    audit["signature"] = signature
+    audit["public_key"] = get_public_key_hex()
 
     return DecisionResponse(
         decision=decision,
