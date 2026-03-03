@@ -25,6 +25,7 @@ def append_audit(entry: Dict[str, Any]) -> Dict[str, Any]:
     prev_hash = None
     if os.path.exists(AUDIT_PATH):
         with open(AUDIT_PATH, "rb") as f:
+            # read last non-empty line
             lines = f.read().splitlines()
             for line in reversed(lines):
                 if line.strip():
