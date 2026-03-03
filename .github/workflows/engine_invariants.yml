@@ -1,0 +1,19 @@
+name: Obsidia Engine Invariants
+on:
+  push:
+  pull_request:
+jobs:
+  engine_invariants:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+      - name: Run engine invariants
+        run: |
+          python core/tests/run_invariants.py
