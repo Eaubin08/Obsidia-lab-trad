@@ -12,3 +12,6 @@ __pycache__/
 core/api/security/nonce_store.json
 core/api/security/ed25519_private.key
 merkle_root.json
+# Ne pas ignorer les ancres RFC3161 (preuve publique)
+!rfc3161_anchor.json
+!rfc3161_anchor.tsr
