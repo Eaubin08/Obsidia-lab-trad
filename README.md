@@ -1,16 +1,17 @@
-# Obsidia Governance OS
+# Obsidia Lab Trad — Unified Structure
 
-A Governance OS for Autonomous Agents, implementing the ERC-8004 standard for financial market safety boundaries.
+This repository centralizes:
 
-## App URL
-[https://ais-dev-iyk2v4j2nqvrimgnnayjhk-422332693421.europe-west2.run.app](https://ais-dev-iyk2v4j2nqvrimgnnayjhk-422332693421.europe-west2.run.app)
+- Deterministic governance engine
+- Public ProofKit (formal verification)
+- Bank-grade adversarial evidence
+- Documentation for audit and research
 
-## Shared App URL
-[https://ais-pre-iyk2v4j2nqvrimgnnayjhk-422332693421.europe-west2.run.app](https://ais-pre-iyk2v4j2nqvrimgnnayjhk-422332693421.europe-west2.run.app)
+## Verify proofs
 
-## Akaton Hackathon Workflow
-1. **Agent Registry**: Register your agent with an ERC-721 handle.
-2. **Capital Vault**: Deposit sandbox funds for trading.
-3. **Risk Router**: Define safety boundaries with EIP-712 trade intents.
-4. **Trust Signals**: Validate agent reputation and L2 sync status.
-5. **Leaderboard**: Track live rankings and performance.
+```
+cd proofkit
+python verify_all.py
+```
+
+Expected output: PASS
