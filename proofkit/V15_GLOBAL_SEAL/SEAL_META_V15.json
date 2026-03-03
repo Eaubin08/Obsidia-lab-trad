@@ -1,0 +1,17 @@
+{
+  "version": "V15",
+  "phase": "15",
+  "timestamp": "2026-03-03T20:01:17.561105Z",
+  "file_count": 500,
+  "root_hash": "b013cfea68945a37f163bc580974666f950654c7262ba2621e933cb029172187",
+  "global_seal_hash": "a0b95a5d8fab12d70faf2ac89160b9610bc5bd39104ecbd82f5aedb6ad0cbb6a",
+  "seal_method": "git-ls-files-only",
+  "commit": "7887196ddb57cf6b0f987eae539493aaea3a7280",
+  "status": "PASS",
+  "lean_build": "Build completed successfully (7 jobs)",
+  "new_theorems": [
+    "merkleRoot_change_if_leaf_change",
+    "globalSeal_change_if_root_change",
+    "P15_Immutability_Strong"
+  ]
+}
