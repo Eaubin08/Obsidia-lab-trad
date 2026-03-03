@@ -2,5 +2,6 @@ import Lake
 open Lake DSL
 
 package «obsidia» where
+
 lean_lib Obsidia where
-  srcDir := "Obsidia"
+  roots := #[`Obsidia]

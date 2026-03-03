@@ -7,6 +7,8 @@
     - Else if ≥3 nodes agree on HOLD -> HOLD
     - Else if ≥3 nodes agree on BLOCK -> BLOCK
     - Else -> BLOCK (fail-closed)
+
+  All theorems proved by exhaustive case analysis (3^4 = 81 cases).
 -/
 
 import Obsidia.Basic
@@ -20,11 +22,11 @@ def countDec (d : Decision3) (xs : List Decision3) : Nat :=
 /-- Consensus aggregator for exactly 4 nodes (supermajority 3/4). -/
 def aggregate4 (d1 d2 d3 d4 : Decision3) : Decision3 :=
   let xs : List Decision3 := [d1, d2, d3, d4]
-  if hAct : 3 ≤ countDec Decision3.ACT xs then
+  if 3 ≤ countDec Decision3.ACT xs then
     Decision3.ACT
-  else if hHold : 3 ≤ countDec Decision3.HOLD xs then
+  else if 3 ≤ countDec Decision3.HOLD xs then
     Decision3.HOLD
-  else if hBlock : 3 ≤ countDec Decision3.BLOCK xs then
+  else if 3 ≤ countDec Decision3.BLOCK xs then
     Decision3.BLOCK
   else
     Decision3.BLOCK
@@ -35,7 +37,8 @@ theorem aggregate4_act
   (h : 3 ≤ countDec Decision3.ACT [d1,d2,d3,d4]) :
   aggregate4 d1 d2 d3 d4 = Decision3.ACT := by
   unfold aggregate4
-  simp [countDec, h]
+  simp only [countDec, List.foldl] at *
+  cases d1 <;> cases d2 <;> cases d3 <;> cases d4 <;> simp_all (config := { decide := true })
 
 /-- If ACT does not supermajority, but HOLD does, aggregate4 = HOLD. -/
 theorem aggregate4_hold
@@ -44,7 +47,8 @@ theorem aggregate4_hold
   (hHold : 3 ≤ countDec Decision3.HOLD [d1,d2,d3,d4]) :
   aggregate4 d1 d2 d3 d4 = Decision3.HOLD := by
   unfold aggregate4
-  simp [countDec, hAct, hHold]
+  simp only [countDec, List.foldl] at *
+  cases d1 <;> cases d2 <;> cases d3 <;> cases d4 <;> simp_all (config := { decide := true })
 
 /-- If neither ACT nor HOLD supermajority, but BLOCK does, aggregate4 = BLOCK. -/
 theorem aggregate4_block_by_supermajority
@@ -54,7 +58,8 @@ theorem aggregate4_block_by_supermajority
   (hBlock : 3 ≤ countDec Decision3.BLOCK [d1,d2,d3,d4]) :
   aggregate4 d1 d2 d3 d4 = Decision3.BLOCK := by
   unfold aggregate4
-  simp [countDec, hAct, hHold, hBlock]
+  simp only [countDec, List.foldl] at *
+  cases d1 <;> cases d2 <;> cases d3 <;> cases d4 <;> simp_all (config := { decide := true })
 
 /-- Fail-closed: if no decision reaches 3/4, output is BLOCK. -/
 theorem aggregate4_fail_closed
@@ -64,6 +69,7 @@ theorem aggregate4_fail_closed
   (hBlock : ¬ (3 ≤ countDec Decision3.BLOCK [d1,d2,d3,d4])) :
   aggregate4 d1 d2 d3 d4 = Decision3.BLOCK := by
   unfold aggregate4
-  simp [countDec, hAct, hHold, hBlock]
+  simp only [countDec, List.foldl] at *
+  cases d1 <;> cases d2 <;> cases d3 <;> cases d4 <;> simp_all (config := { decide := true })
 
 end Obsidia
