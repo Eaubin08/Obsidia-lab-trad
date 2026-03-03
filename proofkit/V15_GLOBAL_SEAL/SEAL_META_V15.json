@@ -1,8 +1,8 @@
 {
-  "version": "V17.1",
-  "phase": "17-18-19-decision-fix",
-  "timestamp": "2026-03-03T21:31:59.604659Z",
-  "FILES_SEALED": 522,
+  "version": "V20",
+  "phase": "20-20b",
+  "timestamp": "2026-03-03T21:53:44.892206Z",
+  "FILES_SEALED": 527,
   "SEAL_METHOD": "git-ls-files-only",
   "EXCLUDED_FROM_MANIFEST": [
     "MASTER_MANIFEST_V15.json",
@@ -11,12 +11,13 @@
   ],
   "ROOT_RULE": "sha256(concat(sorted(manifest_hashes_by_path)))",
   "GLOBAL_RULE": "sha256(manifest_hash + newline + root_hash_file_hash + newline)",
-  "ROOT_HASH": "f98c5eae6a727b3ad7aa59e0b51b699ec94b6a59048c83593fb4cebd835478ae",
-  "manifest_hash": "ef24e71545c7d8d3d3d6ff28ece402c6d96d65a00bb88546b0837dedc69e5bec",
-  "root_hash_file_hash": "3879771d6223ae8117fe4fe119c0e81dae798a971ba9796521c7ff1c16890012",
-  "GLOBAL_SEAL_HASH": "fe3daca4ec7edb6005cead238d1cdf2820a233db02b2dcc5f852c79c201d4cb0",
-  "commit": "964b146b1c45e333bcf2871f6e963e2f18a7b5bc",
-  "tag": "v17.1-decision-fix",
+  "ROOT_HASH": "c603b6d2d3cc2032d5e9e696fd7fb090cb67becfe1e1b2cfc65c663f5cfd2a75",
+  "manifest_hash": "6d90b7ba71dd28832fec3e3f910e63ab144e347424397d5e8c943c6f985f3088",
+  "root_hash_file_hash": "202ffbe886eef455d7aa52e952724b002ce401202c5d4613d9acb9c799e76498",
+  "GLOBAL_SEAL_HASH": "8a2f8547fb3c51e40c9b4dba24e3a8c86c03539367b00f72f9eea808ff0d37fc",
+  "commit": "caa76a9d5e070a9caa9aa182af27a48c07efcdc1",
+  "tag": "v20-final",
   "status": "PASS",
-  "fix": "Decision kernel {HOLD,ACT} vs Decision3 consensus {BLOCK,HOLD,ACT} clarified"
+  "lake_build": "Build completed successfully (10 jobs)",
+  "conformance": "PASS"
 }
