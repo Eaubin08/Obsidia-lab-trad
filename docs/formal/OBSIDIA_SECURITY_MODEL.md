@@ -31,7 +31,7 @@ Les objectifs de sécurité décrivent les propriétés que le système doit mai
 
 | ID | Objectif | Description |
 |:---|:---|:---|
-| **G1** | **Déterminisme de la Décision** | Une même entrée `I` et un même état `S` doivent toujours produire la même décision `D`. |
+| **G1** | **Déterminisme de la Décision** | Une même entrée `I` et un même état `S` doivent toujours produire la même décision `D` du kernel. |
 | **G2** | **Détection de Falsification (Repo)** | Toute modification non autorisée du `Repo` `R` doit être détectée. |
 | **G3** | **Intégrité de l'Audit** | Toute modification non autorisée de l' `AuditLog` `A` doit être détectée. |
 

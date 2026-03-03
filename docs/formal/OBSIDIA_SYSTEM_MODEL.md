@@ -32,11 +32,17 @@ Une entrée `I` est une requête de décision, composée de métriques et d'un s
 
 -   `structure Input where metrics : Metrics, theta : Rat`
 
-### 1.3. Decision `D`
+### 1.3. Decision `D` (Kernel) vs `D³` (Consensus)
 
-Une décision `D` est un type énuméré qui peut être `HOLD` ou `ACT`.
+Le système opère avec deux niveaux de décision :
 
--   `inductive Decision | HOLD | ACT`
+-   **`Decision` (Kernel OS2)** : une décision binaire `{HOLD, ACT}`. Elle est le résultat de la fonction de décision pure du kernel. Le kernel ne peut pas produire de `BLOCK`.
+    -   `inductive Decision | HOLD | ACT`
+
+-   **`Decision3` (Couche Institutionnelle)** : une décision tri-partite `{BLOCK, HOLD, ACT}`. `BLOCK` est exclusivement produit par la couche consensus (`aggregate4`) en cas de quorum non atteint (fail-closed).
+    -   `inductive Decision3 | BLOCK | HOLD | ACT`
+
+La transition entre les deux est assurée par la fonction `liftDecision : Decision → Decision3`, qui est prouvée ne jamais produire `BLOCK` (`L11_3_no_block`).
 
 ### 1.4. Seal `Σ`
 

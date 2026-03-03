@@ -6,10 +6,19 @@
   Définitions :
     State       = (Repo, AuditLog)
     Input       = (Metrics, theta : Rat)
-    Decision    = Basic.Decision (HOLD | ACT)
+    Decision    = Basic.Decision (HOLD | ACT)   -- kernel OS2, jamais BLOCK
+    Decision3   = Basic.Decision3 (BLOCK | HOLD | ACT) -- couche consensus
     AuditRecord = (Input, Decision)
     Transition  = T(State, Input) → (Decision × State)
     sealRepo    = Σ(Repo) → Hash
+
+  Architecture à deux niveaux :
+    1. Kernel OS2 : Decision = {HOLD, ACT}
+       - Jamais BLOCK (prouvé : L11_3_no_block)
+       - Pur et déterministe
+    2. Couche institutionnelle : Decision3 = {BLOCK, HOLD, ACT}
+       - BLOCK produit uniquement par aggregate4 (fail-closed)
+       - liftDecision : Decision → Decision3 (BLOCK exclu)
 
   Propriétés prouvées :
     P17_Determinism    : T(s, i) = T(s, i)  (trivial, mais explicite)
@@ -58,10 +67,22 @@ structure Input where
 -- 4. Decision kernel : fonction de décision pure
 -- ─────────────────────────────────────────────────────────────
 
-/-- Fonction de décision : pure, déterministe.
+/-- Fonction de décision du kernel OS2 : pure, déterministe.
+    Retourne HOLD ou ACT — jamais BLOCK (prouvé par L11_3_no_block).
+    BLOCK est réservé à la couche consensus (aggregate4 fail-closed).
     Réutilise la définition de Basic.lean. -/
 def decide (i : Input) : Obsidia.Decision :=
   Obsidia.decision i.metrics i.theta
+
+/-- Lift vers Decision3 pour la couche institutionnelle / consensus.
+    Garantit que le kernel n'émet jamais BLOCK. -/
+def decideInstitutional (i : Input) : Obsidia.Decision3 :=
+  Obsidia.liftDecision (decide i)
+
+/-- Preuve : le kernel ne produit jamais BLOCK au niveau institutionnel. -/
+theorem P17_KernelNeverBlocks (i : Input) :
+    decideInstitutional i ≠ Obsidia.Decision3.BLOCK :=
+  Obsidia.L11_3_no_block i.metrics i.theta
 
 -- ─────────────────────────────────────────────────────────────
 -- 5. sealRepo : empreinte cryptographique du Repo
