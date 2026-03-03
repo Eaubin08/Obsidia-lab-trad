@@ -1,0 +1,3 @@
+# Prevent line-ending normalization on cryptographic seal artifacts
+proofkit/V18_3_1_ROOT_SEAL/* -text
+proofkit/V18_3_1_ROOT_SEAL/** -text

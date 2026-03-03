@@ -1,7 +1,7 @@
 OBSIDIA V18.3 — ROOT HASH
 Timestamp: 2026-03-03T14:21:17.600300Z
 Method: SHA256 over sorted list of per-file SHA256 lines; then SHA256 of the concatenated text.
-RootHash: de30d03aee32fb849dac7de512908e2e78d4ba16728005ed8613b0b841dd3c6b
+RootHash: 6cd9f9e0be18640ec28a7787e5ff641c45fc0e91e283183acbb286757994bf8b
 
 FileList (sha256  path):
 8652710ff9bef10fb6ce3be81e0af103b8b000f84df13419cf7382bd27ba31bc  MASTER_MANIFEST_V18_3.json
