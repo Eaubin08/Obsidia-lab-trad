@@ -16,4 +16,5 @@ jobs:
           pip install pytest
       - name: Run engine invariants
         run: |
-          python core/tests/run_invariants.py
+          python -m pytest core/tests/test_invariants_against_engine.py -v
+
