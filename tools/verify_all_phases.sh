@@ -43,25 +43,25 @@ run_step "Step 1: Seal Verification" \
 
 # Step 2 — Lean Formal Proofs
 run_step "Step 2: Lean Formal Proofs" \
-    "cd lean && lake build Obsidia.Main && cd .."
+    "cd \"$REPO_ROOT/lean\" && PATH=\"$HOME/.elan/bin:$PATH\" lake build Obsidia.Main && cd \"$REPO_ROOT\""
 
 # Step 3 — Adversarial Suite
 run_step "Step 3: Adversarial Suite (A1)" \
-    "python3 tools/adversarial/test_monotonic_break.py"
+    "python3 \"$REPO_ROOT/tools/adversarial/test_monotonic_break.py\""
 run_step "Step 3: Adversarial Suite (A2)" \
-    "python3 tools/adversarial/test_threshold_fuzz.py"
+    "python3 \"$REPO_ROOT/tools/adversarial/test_threshold_fuzz.py\""
 run_step "Step 3: Adversarial Suite (B1)" \
-    "python3 tools/adversarial/test_merkle_collision.py"
+    "python3 \"$REPO_ROOT/tools/adversarial/test_merkle_collision.py\""
 run_step "Step 3: Adversarial Suite (C1)" \
-    "python3 tools/adversarial/test_seal_tamper.py"
+    "python3 \"$REPO_ROOT/tools/adversarial/test_seal_tamper.py\""
 run_step "Step 3: Adversarial Suite (D1)" \
-    "python3 tools/adversarial/test_consensus_split.py"
+    "python3 \"$REPO_ROOT/tools/adversarial/test_consensus_split.py\""
 run_step "Step 3: Adversarial Suite (E1)" \
-    "python3 tools/adversarial/test_signature_tamper.py"
+    "python3 \"$REPO_ROOT/tools/adversarial/test_signature_tamper.py\""
 
 # Step 4 — Threat Model
 run_step "Step 4: Threat Model (8 claims)" \
-    "python3 tools/verify_threat_model.py"
+    "python3 \"$REPO_ROOT/tools/verify_threat_model.py\""
 
 echo ""
 echo "========================================================"
