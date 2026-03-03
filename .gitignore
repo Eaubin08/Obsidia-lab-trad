@@ -6,3 +6,6 @@ coverage/
 *.log
 .env*
 !.env.example
+core/api/audit_log.jsonl
+__pycache__/
+*.pyc
