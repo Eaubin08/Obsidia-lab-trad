@@ -1,8 +1,8 @@
 {
-  "version": "V20",
-  "phase": "20-20b",
-  "timestamp": "2026-03-03T21:53:44.892206Z",
-  "FILES_SEALED": 527,
+  "version": "V24",
+  "phase": "24-tla-plus",
+  "timestamp": "2026-03-03T22:17:21.015473Z",
+  "FILES_SEALED": 544,
   "SEAL_METHOD": "git-ls-files-only",
   "EXCLUDED_FROM_MANIFEST": [
     "MASTER_MANIFEST_V15.json",
@@ -11,13 +11,14 @@
   ],
   "ROOT_RULE": "sha256(concat(sorted(manifest_hashes_by_path)))",
   "GLOBAL_RULE": "sha256(manifest_hash + newline + root_hash_file_hash + newline)",
-  "ROOT_HASH": "c603b6d2d3cc2032d5e9e696fd7fb090cb67becfe1e1b2cfc65c663f5cfd2a75",
-  "manifest_hash": "6d90b7ba71dd28832fec3e3f910e63ab144e347424397d5e8c943c6f985f3088",
-  "root_hash_file_hash": "202ffbe886eef455d7aa52e952724b002ce401202c5d4613d9acb9c799e76498",
-  "GLOBAL_SEAL_HASH": "8a2f8547fb3c51e40c9b4dba24e3a8c86c03539367b00f72f9eea808ff0d37fc",
-  "commit": "caa76a9d5e070a9caa9aa182af27a48c07efcdc1",
-  "tag": "v20-final",
+  "ROOT_HASH": "af5480ec51383a56f5288355081f371fa91da3143b3ab176b9c31ef30487fd46",
+  "manifest_hash": "fd702ee0d0230bfbdbff4f774aa4520811b703ad1795111071a135493783b133",
+  "root_hash_file_hash": "0c26c8f6d48fe97848ebc3b7b4f1f5076983b47df53bf9b0b2d6bcebe0b7d1c5",
+  "GLOBAL_SEAL_HASH": "49f4d4e7de15bbea50cd76ea8109fbae796d61bc4916004edea68746f82af6aa",
+  "commit": "75e4e09374f25cfc626e683d20015bf7807c780d",
+  "tag": "v24-final",
   "status": "PASS",
   "lake_build": "Build completed successfully (10 jobs)",
-  "conformance": "PASS"
+  "conformance": "PASS",
+  "trace_check": "ALL PASS 0/8000 violations"
 }
