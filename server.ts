@@ -244,6 +244,47 @@ async function startServer() {
     res.json(results);
   });
 
+  // ─── Proxy vers le moteur Python OS0/OS1/OS2 (FastAPI sur port 8000) ──────────────────
+  const PYTHON_ENGINE_URL = process.env.PYTHON_ENGINE_URL || "http://localhost:8000";
+
+  app.post("/api/python-engine/decision", async (req, res) => {
+    try {
+      const response = await fetch(`${PYTHON_ENGINE_URL}/v1/decision`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(req.body),
+      });
+      if (!response.ok) {
+        const err = await response.text();
+        return res.status(response.status).json({ error: err });
+      }
+      const data = await response.json();
+      res.json(data);
+    } catch (e: any) {
+      // Moteur Python non démarré — retourner une erreur explicite
+      res.status(503).json({
+        error: "Python engine unavailable",
+        hint: "Start the Python engine: cd core/engine && uvicorn api_server.main:app --port 8000",
+        detail: String(e?.message ?? e),
+      });
+    }
+  });
+
+  app.get("/api/python-engine/health", async (req, res) => {
+    try {
+      const response = await fetch(`${PYTHON_ENGINE_URL}/health`, {
+        signal: AbortSignal.timeout(2000),
+      });
+      const data = await response.json();
+      res.json({ python_engine: "online", ...data });
+    } catch {
+      res.json({
+        python_engine: "offline",
+        hint: "cd core/engine && uvicorn api_server.main:app --port 8000",
+      });
+    }
+  });
+
   app.get("/api/artifacts", (req, res) => {
     // Artifacts export
     const artifactId = `OBSIDIA-${Date.now()}`;

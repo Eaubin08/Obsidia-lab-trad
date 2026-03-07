@@ -66,8 +66,17 @@ def run_final(
     """
 
     # 0) Registry gate (Pivot allowlist)
+    # FIX: agent_id=None est une tentative de bypass — REJECT si la registry est active
     allow = _pivot_allowlist(registry_path)
-    if agent_id is not None and allow:
+    if allow:  # registry non vide => toute requête doit présenter un agent_id valide
+        if agent_id is None:
+            return FinalResult(
+                decision="REJECT",
+                ssr="REGISTRY_REJECT: agent_id manquant (None) — identification obligatoire.",
+                registry_ok=False,
+                os2=None,
+                os1=None,
+            )
         if str(agent_id) not in set(allow):
             return FinalResult(
                 decision="REJECT",
