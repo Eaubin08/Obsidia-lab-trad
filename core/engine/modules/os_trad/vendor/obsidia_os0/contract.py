@@ -1,131 +1,83 @@
 from __future__ import annotations
-from dataclasses import dataclass
 from typing import Any, List, Tuple
-
 from . import ir
 
-Violation = Tuple[str, str]
+# ===== L2.5 Contract rules R1-R10 (validator) =====
+# Note: Règles sont appliquées structurellement au programme IR.
+# Le runner applique aussi des sanctions runtime (rollback/blockage etc) via exceptions.
 
-# Contract = syntactic & structural safety checks (no execution)
+Violation = Tuple[str, str]  # (Rule, message)
 
-_ALLOWED = (
-    ir.FLOW, ir.STATE, ir.READ, ir.WRITE, ir.VALUE, ir.EVENT, ir.CALL, ir.COND,
-    ir.LOOP, ir.IF, ir.FUNC, ir.CALLFUNC, ir.RETURN,
-    # Palier 5
-    ir.TYPE, ir.ANN, ir.ALLOW, ir.LIMIT, ir.ALLOC, ir.FREE, ir.MREAD, ir.MWRITE, ir.SPAWN, ir.AWAIT,
-)
+class ContractViolationError(Exception):
+    """Levée si le programme viole au moins une règle R1-R10."""
+    def __init__(self, violations: List[Violation]):
+        self.violations = violations
+        msgs = "; ".join(f"[{r}] {m}" for r, m in violations)
+        super().__init__(f"Contract violations ({len(violations)}): {msgs}")
+
 
 def validate(program: Any) -> List[Violation]:
-    if isinstance(program, dict):
-        program = program.get("program", program)
+    """Vérifie les règles R1-R10.
 
+    Retourne la liste des violations si le programme est valide (liste vide).
+    Lève ContractViolationError si au moins une règle est violée.
+    """
     v: List[Violation] = []
-
-    # Palier5 presence gate: activate extra rules only if Palier5 nodes are present
-    has_limit = False
-    allow_effects = set()
-    uses_io = False  # currently: CALL print() considered IO effect in Palier5
-
-    def scan(n: Any):
-        nonlocal has_limit, uses_io
-        if n is None: return
-        if isinstance(n, list):
-            for x in n: scan(x)
-            return
-        if isinstance(n, ir.LIMIT):
-            has_limit = True
-        if isinstance(n, ir.ALLOW):
-            allow_effects.add(n.effect)
-        if isinstance(n, ir.CALL) and n.fn == 'print':
-            uses_io = True
-        # descend
-        for attr in getattr(n, '__dict__', {}).values():
-            if isinstance(attr, (list, tuple)) or hasattr(attr, '__dict__'):
-                scan(attr)
-    scan(program)
-    palier5_present = has_limit or bool(allow_effects)
-
-    def walk(node: Any):
-        if node is None:
-            return
-        if not isinstance(node, _ALLOWED) and not (isinstance(node, tuple) and len(node)==3):
-            v.append(("R00", f"Type IR non autorisé: {type(node).__name__}"))
-            return
-
-        # basic state name
-        if isinstance(node, ir.STATE):
-            if not isinstance(node.name, str) or not node.name:
-                v.append(("R01", "STATE.name doit être string non-vide"))
-
-        # LOOP
-        if isinstance(node, ir.LOOP):
-            if not isinstance(node.max_iters, int) or node.max_iters <= 0:
-                v.append(("R02", "LOOP.max_iters doit être int > 0"))
-
-        # CALL / CALLFUNC
-        if isinstance(node, ir.CALL):
-            if not isinstance(node.fn, str) or not node.fn:
-                v.append(("R03", "CALL.fn doit être string non-vide"))
-        if isinstance(node, ir.CALLFUNC):
-            if not isinstance(node.name, str) or not node.name:
-                v.append(("R04", "CALLFUNC.name doit être string non-vide"))
-
-        # Palier-5 rules
-        if isinstance(node, ir.ALLOW):
-            if not isinstance(node.effect, str) or not node.effect:
-                v.append(("R20", "ALLOW(effect) doit contenir une string non-vide"))
-        if isinstance(node, ir.LIMIT):
-            for k, val in (("cpu_steps", node.cpu_steps), ("mem_bytes", node.mem_bytes), ("io_ops", node.io_ops)):
-                if val is not None and (not isinstance(val, int) or val <= 0):
-                    v.append(("R21", f"LIMIT.{k} doit être un int > 0"))
-        if isinstance(node, ir.ANN):
-            if not isinstance(node.var, str) or not node.var:
-                v.append(("R22", "ANN.var doit être string non-vide"))
-            if not isinstance(node.typ, ir.TYPE):
-                v.append(("R22", "ANN.typ doit être TYPE"))
-        if isinstance(node, (ir.ALLOC, ir.FREE, ir.MREAD, ir.MWRITE)):
-            nm = getattr(node, "name", None)
-            if not isinstance(nm, str) or not nm:
-                v.append(("R23", f"{type(node).__name__}.name doit être string non-vide"))
-        if isinstance(node, ir.SPAWN):
-            if not isinstance(node.fn, str) or not node.fn:
-                v.append(("R24", "SPAWN.fn doit être string non-vide"))
-
-        # recurse
-        if isinstance(node, ir.FLOW):
-            for n in node.steps: walk(n)
-        elif isinstance(node, ir.READ):
-            walk(node.state)
-        elif isinstance(node, ir.WRITE):
-            walk(node.state); walk(node.value)
-        elif isinstance(node, ir.COND):
-            walk(node.expr)
-        elif isinstance(node, ir.LOOP):
-            walk(node.cond); 
-            for s in node.body: walk(s)
-        elif isinstance(node, ir.IF):
-            walk(node.cond)
-            for s in node.then_body: walk(s)
-            for s in node.else_body: walk(s)
-        elif isinstance(node, ir.FUNC):
-            for s in node.body: walk(s)
-        elif isinstance(node, ir.CALLFUNC):
-            for a in node.args: walk(a)
-        elif isinstance(node, ir.CALL):
-            for a in node.args: walk(a)
-        elif isinstance(node, ir.RETURN):
-            walk(node.value)
-        elif isinstance(node, ir.ALLOC):
-            walk(node.typ)
-        elif isinstance(node, ir.MWRITE):
-            walk(node.value)
-        elif isinstance(node, ir.AWAIT):
-            walk(node.task)
-        elif isinstance(node, ir.SPAWN):
-            for a in node.args: walk(a)
-        elif isinstance(node, tuple) and len(node)==3:
-            _, a, b = node
-            walk(a); walk(b)
-
-    walk(program)
+    _walk(program, v)
+    if v:
+        raise ContractViolationError(v)
     return v
+
+def _walk(node: Any, v: List[Violation]):
+    # Accept list as top-level
+    if isinstance(node, list):
+        for n in node:
+            _walk(n, v)
+        return
+
+    # R10: hors alphabet = inexistant (ici: hors classes IR connues)
+    allowed = (
+        ir.VALUE, ir.STATE, ir.READ, ir.WRITE, ir.FLOW, ir.COND, ir.LOOP,
+        ir.CALL, ir.RETURN, ir.EVENT, ir.TIME
+    )
+    if not isinstance(node, allowed):
+        v.append(("R10", f"Hors-alphabet: {type(node).__name__}"))
+        return
+
+    # R1: Toute info/action opère sur STATE (structurel: READ/WRITE exigent STATE)
+    if isinstance(node, ir.READ) and not isinstance(node.state, ir.STATE):
+        v.append(("R1", "READ doit viser un STATE"))
+    if isinstance(node, ir.WRITE) and not isinstance(node.state, ir.STATE):
+        v.append(("R1", "WRITE doit viser un STATE"))
+
+    # R2: READ -> VALUE (structurel: READ node ok; runtime checks in runner)
+    # R3: WRITE modifie un STATE (runtime: no side effects outside env)
+    # R4: CALL -> RETURN ou ERROR (runtime)
+    # R5: toute bifurcation via COND (structurel: LOOP has COND; if user wants IF, represent as COND+FLOW)
+    if isinstance(node, ir.LOOP) and not isinstance(node.cond, ir.COND):
+        v.append(("R5", "LOOP doit utiliser COND"))
+    # R6: LOOP doit avoir une sortie : enforce via max_iters
+    if isinstance(node, ir.LOOP) and (node.max_iters is None or node.max_iters <= 0):
+        v.append(("R6", "LOOP doit avoir max_iters > 0"))
+    # R7: EVENT externe et horodaté: encourage t not None
+    if isinstance(node, ir.EVENT) and node.t is None:
+        v.append(("R7", f"EVENT '{node.name}' sans timestamp"))
+    # R8: TIME impose l'ordre (runtime)
+    # R9: ERROR traçable et bloquante (runtime)
+
+    # Recurse
+    if isinstance(node, ir.FLOW):
+        for s in node.steps:
+            _walk(s, v)
+    elif isinstance(node, ir.LOOP):
+        _walk(node.cond, v)
+        for s in node.body:
+            _walk(s, v)
+    elif isinstance(node, ir.CALL):
+        for a in node.args:
+            _walk(a, v) if isinstance(a, (allowed, list)) else None
+    elif isinstance(node, ir.WRITE):
+        _walk(node.value, v) if isinstance(node.value, allowed) else None
+    elif isinstance(node, ir.COND):
+        # expr may be callable or tuple; can't validate deeper safely
+        pass

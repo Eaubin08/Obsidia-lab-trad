@@ -8,9 +8,24 @@ from . import ir
 
 Violation = Tuple[str, str]  # (Rule, message)
 
+class ContractViolationError(Exception):
+    """Levée si le programme viole au moins une règle R1-R10."""
+    def __init__(self, violations: List[Violation]):
+        self.violations = violations
+        msgs = "; ".join(f"[{r}] {m}" for r, m in violations)
+        super().__init__(f"Contract violations ({len(violations)}): {msgs}")
+
+
 def validate(program: Any) -> List[Violation]:
+    """Vérifie les règles R1-R10.
+
+    Retourne la liste des violations si le programme est valide (liste vide).
+    Lève ContractViolationError si au moins une règle est violée.
+    """
     v: List[Violation] = []
     _walk(program, v)
+    if v:
+        raise ContractViolationError(v)
     return v
 
 def _walk(node: Any, v: List[Violation]):
