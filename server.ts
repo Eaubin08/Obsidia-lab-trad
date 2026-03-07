@@ -151,38 +151,59 @@ async function startServer() {
 
   app.post("/api/banking/gemini", async (req, res) => {
     const { decision, metrics, transaction } = req.body;
-    const apiKey = process.env.GEMINI_API_KEY;
-    
-    if (!apiKey) {
-      return res.status(500).json({ error: "GEMINI_API_KEY not configured" });
-    }
+    const prompt = `Explain why this banking transaction was ${decision?.decision ?? "evaluated"} based on the following metrics:
+- IR (Irreversibility): ${(metrics?.IR ?? 0).toFixed(2)}
+- CIZ (Conflict Zone): ${(metrics?.CIZ ?? 0).toFixed(2)}
+- DTS (Time Sensitivity): ${(metrics?.DTS ?? 0).toFixed(2)}
+- TSG (Total Guard): ${(metrics?.TSG ?? 0).toFixed(2)}
 
-    const ai = new GoogleGenAI({ apiKey });
-    const prompt = `
-      Explain why this banking transaction was ${decision.decision} based on the following metrics:
-      - IR (Irreversibility): ${metrics.IR.toFixed(2)}
-      - CIZ (Conflict Zone): ${metrics.CIZ.toFixed(2)}
-      - DTS (Time Sensitivity): ${metrics.DTS.toFixed(2)}
-      - TSG (Total Guard): ${metrics.TSG.toFixed(2)}
-      
-      Transaction Details:
-      - Amount: ${transaction.amount} ${transaction.currency}
-      - Sender: ${transaction.sender}
-      - Recipient: ${transaction.recipient}
-      - Type: ${transaction.type}
+Transaction Details:
+- Amount: ${transaction?.amount ?? "N/A"} ${transaction?.currency ?? ""}
+- Sender: ${transaction?.sender ?? "N/A"}
+- Recipient: ${transaction?.recipient ?? "N/A"}
+- Type: ${transaction?.type ?? "N/A"}
+Provide a professional and concise justification for a bank administrator.`;
 
-      Provide a professional and concise justification for a bank administrator.
-    `;
+    // Try Gemini first, fallback to Manus built-in LLM
+    const geminiKey = process.env.GEMINI_API_KEY;
+    const forgeKey = process.env.BUILT_IN_FORGE_API_KEY;
+    const forgeUrl = process.env.BUILT_IN_FORGE_API_URL;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash-latest",
-        contents: prompt,
-      });
-      res.json({ justification: response.text || "No justification generated." });
+      if (geminiKey) {
+        // Use Google Gemini
+        const ai = new GoogleGenAI({ apiKey: geminiKey });
+        const response = await ai.models.generateContent({
+          model: "gemini-1.5-flash-latest",
+          contents: prompt,
+        });
+        return res.json({ justification: response.text || "No justification generated.", source: "gemini" });
+      } else if (forgeKey) {
+        // Fallback: Manus built-in LLM (same API as OpenAI)
+        const apiUrl = forgeUrl
+          ? `${forgeUrl.replace(/\/$/, "")}/v1/chat/completions`
+          : "https://forge.manus.im/v1/chat/completions";
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${forgeKey}` },
+          body: JSON.stringify({
+            model: "gemini-2.5-flash",
+            messages: [
+              { role: "system", content: "You are a professional banking compliance officer. Be concise and precise." },
+              { role: "user", content: prompt },
+            ],
+            max_tokens: 512,
+          }),
+        });
+        const data = await response.json() as any;
+        const text = data?.choices?.[0]?.message?.content ?? "No justification generated.";
+        return res.json({ justification: text, source: "manus-llm" });
+      } else {
+        return res.status(500).json({ error: "No LLM API key configured (GEMINI_API_KEY or BUILT_IN_FORGE_API_KEY required)" });
+      }
     } catch (error) {
       console.error("Error generating justification:", error);
-      res.status(500).json({ error: "Error generating justification via Gemini AI." });
+      res.status(500).json({ error: "Error generating justification via LLM." });
     }
   });
 
